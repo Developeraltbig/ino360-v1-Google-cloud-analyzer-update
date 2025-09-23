@@ -31,7 +31,7 @@ function UploadPDFInno() {
 
   // Add this new state to track if Key Features are ready
   const [keyFeaturesReady, setKeyFeaturesReady] = useState(false);
-
+  const [isAnalysisTriggeredByUser, setIsAnalysisTriggeredByUser] = useState(false);
   const [justGeneratedInno, setJustGeneratedInno] = useState(false);
   const [justGeneratedInno2, setJustGeneratedInno2] = useState(false);
   const [justGeneratedInno4, setJustGeneratedInno4] = useState(false);
@@ -1086,14 +1086,17 @@ function UploadPDFInno() {
     generateanswerInnoWithQuestion(e, newQuestion);
   }
 
-  async function generateanswerInno2(e) {
-    e.preventDefault();
-    const questionInnoContent =
-      document.getElementById("secondQuestionInno").innerText;
-    const newQuestion = `${projectData.pdf_text}\n${questionInnoContent}`;
-    setQuestionInno2(newQuestion);
-    generateanswerInno2WithQuestion(e, newQuestion);
-  }
+async function generateanswerInno2(e) {
+  e.preventDefault();
+  // ADD THIS LINE
+  setIsAnalysisTriggeredByUser(true); 
+
+  const questionInnoContent =
+    document.getElementById("secondQuestionInno").innerText;
+  const newQuestion = `${projectData.pdf_text}\n${questionInnoContent}`;
+  setQuestionInno2(newQuestion);
+  generateanswerInno2WithQuestion(e, newQuestion);
+}
 
   async function generateanswerInno4(e) {
     e.preventDefault();
@@ -1498,7 +1501,7 @@ function UploadPDFInno() {
 
     // Reset key features ready flag and previous analysis results
     setKeyFeaturesReady(false);
-
+    setIsAnalysisTriggeredByUser(true); 
     // Reset any previous analysis results
     if (inventionAnalyzerRef.current) {
       inventionAnalyzerRef.current.resetAnalysis();
@@ -1714,29 +1717,36 @@ function UploadPDFInno() {
 }, []); // Empty dependency array runs once on mount
 
   // Add this useEffect to trigger invention analysis when Key Features are ready
-  useEffect(() => {
-    if (
-      keyFeaturesReady &&
-      answerInno2 &&
-      answerInno2.trim() !== "" &&
-      answerInno2 !== "Generating answer... Wait for a while..."
-    ) {
-      console.log("Key Features are ready, triggering invention analysis");
+// Add this useEffect to trigger invention analysis when Key Features are ready
+useEffect(() => {
+  // MODIFIED CONDITION: Check for the user trigger flag first
+  if (
+    isAnalysisTriggeredByUser &&
+    keyFeaturesReady &&
+    answerInno2 &&
+    answerInno2.trim() !== "" &&
+    answerInno2 !== "Generating answer... Wait for a while..."
+  ) {
+    console.log(
+      "User-triggered analysis: Key Features ready, initiating..."
+    );
 
-      if (inventionAnalyzerRef.current) {
-        inventionAnalyzerRef.current.resetAnalysis();
-        inventionAnalyzerRef.current
-          .handleSubmit()
-          .then(() => {
-            console.log("Analyzer completed, saving all data");
-            handleSubmit();
-          })
-          .catch((error) => {
-            console.error("Error in analyzer handleSubmit:", error);
-          });
-      }
+    if (inventionAnalyzerRef.current) {
+      inventionAnalyzerRef.current.resetAnalysis();
+      inventionAnalyzerRef.current
+        .handleSubmit()
+        .then(() => {
+          console.log("Analyzer completed, saving all data");
+          handleSubmit();
+        })
+        .catch((error) => {
+          console.error("Error in analyzer handleSubmit:", error);
+        });
     }
-  }, [keyFeaturesReady, answerInno2]);
+    // IMPORTANT: Reset the flag to prevent re-triggers on subsequent renders
+    setIsAnalysisTriggeredByUser(false);
+  }
+}, [keyFeaturesReady, answerInno2, isAnalysisTriggeredByUser]); // ADD isAnalysisTriggeredByUser to the dependency array
 
   const handleSubmit = async () => {
     const userData = JSON.parse(localStorage.getItem("user"));
