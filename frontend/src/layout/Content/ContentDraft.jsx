@@ -1538,7 +1538,7 @@ const ContentDraft = () => {
     setAnswer("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1562,7 +1562,7 @@ const ContentDraft = () => {
     setAnswer2("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1586,7 +1586,7 @@ const ContentDraft = () => {
     setAnswer3("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1610,7 +1610,7 @@ const ContentDraft = () => {
     setAnswer4("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1640,7 +1640,7 @@ const ContentDraft = () => {
     setAnswer5("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1709,7 +1709,7 @@ const ContentDraft = () => {
     setAnswer6("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1733,7 +1733,7 @@ const ContentDraft = () => {
     setAnswer7("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1757,7 +1757,7 @@ const ContentDraft = () => {
     setAnswer8("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1784,7 +1784,7 @@ const ContentDraft = () => {
       const enhancedQuestion = `${questionText}\n\nIMPORTANT: Return ONLY the raw PlantUML syntax, without any HTML tags, formatting, or additional text. Start with @startuml on its own line and end with @enduml on its own line. Do not include backticks, markdown formatting, or explanations.`;
 
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: enhancedQuestion }] }],
@@ -1832,7 +1832,7 @@ const ContentDraft = () => {
     setAnswer10("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1855,7 +1855,7 @@ const ContentDraft = () => {
     setAnswer11("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1879,7 +1879,7 @@ const ContentDraft = () => {
     setAnswer12("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1903,7 +1903,7 @@ const ContentDraft = () => {
     setAnswer13("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1927,7 +1927,7 @@ const ContentDraft = () => {
     setAnswer14("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1955,7 +1955,7 @@ const ContentDraft = () => {
       const enhancedQuestion = `${questionText}\n\nIMPORTANT: Return ONLY the raw PlantUML syntax, without any HTML tags, formatting, or additional text. Start with @startuml on its own line and end with @enduml on its own line. Do not include backticks, markdown formatting, or explanations.`;
 
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: enhancedQuestion }] }],
@@ -2556,7 +2556,7 @@ const ContentDraft = () => {
     try {
       // We need to await this explicitly because we need its output for the diagrams
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: newQuestion5 }] }],

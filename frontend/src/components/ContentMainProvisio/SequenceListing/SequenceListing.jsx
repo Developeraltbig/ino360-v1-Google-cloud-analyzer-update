@@ -47,7 +47,7 @@ const SequenceListing = () => {
     setAnswer8("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: question8 }] }],
