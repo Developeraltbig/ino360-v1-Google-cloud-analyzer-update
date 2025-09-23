@@ -1,0 +1,82 @@
+/* frontend/src/assets/css/customQuillStyles.css */
+
+/* Styles for the overall toolbar container */
+.ql-toolbar.ql-snow {
+  border: 1px solid #ccc; /* Keep existing border */
+  box-sizing: border-box;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif; /* Keep existing font */
+  padding: 8px; /* Keep existing padding */
+  /* Keep custom background if desired */
+  background: linear-gradient(
+    90deg,
+    rgba(204, 253, 216, 1) 0%,
+    rgba(177, 220, 236, 1) 35%,
+    rgba(152, 190, 252, 1) 100%
+  ) !important;
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  margin-right: 8px;
+}
+
+/* Styles for the editor area below the toolbar */
+.ql-editor {
+  background-color: white; /* Keep existing background */
+  border-radius: 0 0 20px 20px; /* Keep existing border-radius */
+  line-height: 1.6; /* Improve line spacing overall */
+  font-family: var(
+    --font-family-bai
+  ) !important; /* This now points to "Open Sans" */
+  /* Ensure the editor base font size matches the application's base */
+  font-size: inherit !important;
+}
+
+/* Improved spacing for headings */
+.ql-editor h1 {
+  /* margin-top: 0.5em !important; */
+  margin-bottom: 0.5em !important;
+  font-size: 1.8em;
+}
+
+.ql-editor h2 {
+  margin-top: 1.5em !important;
+  margin-bottom: 0.8em !important;
+  font-size: 1.5em;
+}
+
+/* Paragraph spacing */
+.ql-editor p {
+  margin-bottom: 0.5em !important;
+}
+
+/* Add extra spacing between paragraphs */
+.ql-editor p + p {
+  margin-top: 1em;
+}
+
+/* List spacing */
+.ql-editor ul,
+.ql-editor ol {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.ql-editor li {
+  margin-bottom: 0.5em;
+}
+
+/* Add spacing after lists */
+.ql-editor li:last-child {
+  margin-bottom: 1em;
+}
+
+/* Ensure lines in lists are well-spaced */
+.ql-editor li p {
+  margin-bottom: 0.3em;
+}
+
+/* Add spacing for pre-formatted code blocks */
+.ql-editor pre {
+  margin-bottom: 1em;
+}

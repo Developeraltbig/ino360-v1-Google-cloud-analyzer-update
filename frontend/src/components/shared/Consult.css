@@ -1,0 +1,109 @@
+/* frontend/src/components/shared/Consult.css */
+.consult-modal .modal-content {
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+.consult-modal .modal-header {
+  border-bottom: 1px solid #eef1f6;
+  padding: 20px 30px;
+  background-color: #ffffff;
+}
+
+.consult-modal .modal-title {
+  color: #2c80d3;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.consult-modal .modal-body {
+  padding: 25px 30px;
+  min-height: 40vh;
+}
+
+.consult-modal .form-label-custom {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.consult-modal .form-select-custom {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.consult-modal .form-select-custom:focus {
+  border-color: #44b9ff;
+  box-shadow: 0 0 0 0.25rem rgba(68, 185, 255, 0.25);
+}
+
+.consult-modal .report-options {
+  padding: 10px 0;
+}
+
+.consult-modal .report-checkbox {
+  margin-bottom: 15px;
+}
+
+.consult-modal .report-checkbox label {
+  font-weight: 400;
+  padding-left: 10px;
+}
+
+.consult-modal .send-btn {
+  background: linear-gradient(135deg, #44b9ff, #3586cb);
+  border: none;
+  padding: 12px 40px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 16px;
+  width: 60%;
+  margin-top: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(68, 185, 255, 0.2);
+}
+
+.consult-modal .send-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(68, 185, 255, 0.3);
+  background: linear-gradient(135deg, #3aaefc, #2a7bbe);
+}
+
+.consult-modal .close {
+  color: #aaa;
+  font-size: 28px;
+}
+
+.consult-modal .close:hover {
+  color: #444;
+}
+
+@media (max-width: 992px) {
+  .consult-modal .modal-body {
+    padding: 20px 25px;
+  }
+
+  .consult-modal .send-btn {
+    width: 80%;
+  }
+}
+
+@media (max-width: 576px) {
+  .consult-modal .modal-body {
+    padding: 15px 20px;
+  }
+
+  .consult-modal .send-btn {
+    width: 100%;
+    padding: 10px 20px;
+  }
+
+  .consult-modal .modal-title {
+    font-size: 18px;
+  }
+}

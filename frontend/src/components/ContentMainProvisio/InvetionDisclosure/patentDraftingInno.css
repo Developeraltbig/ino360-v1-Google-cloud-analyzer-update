@@ -1,0 +1,20 @@
+.btn-lft-arrow {
+    content: "";
+    border-bottom: 2px solid #018cbbab;
+    text-align: center;
+    height: 10px;
+    margin-bottom: 5px;
+    width: 40px;
+    display: inline-block;
+}
+
+.btn-rgt-arrow {
+    content: "";
+    border-bottom: 2px solid #018cbbab;
+    text-align: center;
+    height: 10px;
+    margin-bottom: 5px;
+    width: 40px;
+    display: inline-block;
+    margin-right: 7px;
+}

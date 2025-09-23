@@ -1,0 +1,280 @@
+/* frontend/src/components/GenerateIDF/GenerateIDF.css */
+.generate-idf-modal .modal-title {
+  color: #008CBF;
+  font-weight: 600;
+}
+
+.generate-idf-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.generate-idf-modal .instruction-text {
+  color: #555;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.generate-idf-modal .file-upload-container {
+  margin-bottom: 1.5rem;
+}
+
+.generate-idf-modal .file-input {
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  transition: all 0.3s;
+}
+
+.generate-idf-modal .file-input:focus {
+  border-color: #008CBF;
+  box-shadow: 0 0 0 0.2rem rgba(0, 140, 191, 0.25);
+}
+
+.generate-idf-modal .form-helper-text {
+  color: #777;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.generate-idf-modal .selected-files-container {
+  background-color: rgba(240, 249, 255, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.generate-idf-modal .selected-files-title {
+  color: #008CBF;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.generate-idf-modal .selected-files-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.generate-idf-modal .file-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.generate-idf-modal .file-item:last-child {
+  border-bottom: none;
+}
+
+.generate-idf-modal .file-icon {
+  color: #008CBF;
+  margin-right: 0.5rem;
+}
+
+.generate-idf-modal .error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+/* Processing state styling */
+.generate-idf-modal .processing-container {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.generate-idf-modal .spinner-container {
+  margin-bottom: 1.5rem;
+}
+
+.generate-idf-modal .spinner {
+  border: 5px solid rgba(0, 140, 191, 0.2);
+  border-radius: 50%;
+  border-top: 5px solid #008CBF;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.generate-idf-modal .processing-title {
+  color: #008CBF;
+  margin: 1rem 0;
+  font-weight: 600;
+}
+
+.generate-idf-modal .processing-description {
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.generate-idf-modal .processing-note {
+  color: #777;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* Success state styling */
+.generate-idf-modal .success-container {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.generate-idf-modal .success-icon-container {
+  margin-bottom: 1rem;
+}
+
+.generate-idf-modal .success-icon {
+  color: #28a745;
+  font-size: 3rem;
+}
+
+.generate-idf-modal .success-title {
+  color: #28a745;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.generate-idf-modal .success-description {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.generate-idf-modal .module-selection-container {
+  background-color: rgba(240, 249, 255, 0.8);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin: 0 auto;
+  max-width: 90%;
+}
+
+.generate-idf-modal .module-title {
+  color: #555;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.generate-idf-modal .module-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.generate-idf-modal .module-button {
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 130px;
+}
+
+.generate-idf-modal .innocheck-btn {
+  background-color: #008CBF;
+}
+
+.generate-idf-modal .provisio-btn {
+  background-color: #2196F3;
+}
+
+.generate-idf-modal .draftmaster-btn {
+  background-color: #0D47A1;
+}
+
+.generate-idf-modal .module-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Button styling */
+.generate-idf-modal .modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.generate-idf-modal .cancel-btn {
+  background-color: transparent;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.generate-idf-modal .cancel-btn:hover {
+  background-color: #f8f9fa;
+}
+
+.generate-idf-modal .generate-btn {
+  background-color: #008CBF;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.generate-idf-modal .generate-btn:hover:not(:disabled) {
+  background-color: #006e99;
+  box-shadow: 0 2px 6px rgba(0, 140, 191, 0.2);
+}
+
+.generate-idf-modal .generate-btn:disabled {
+  background-color: #a7d6e7;
+  cursor: not-allowed;
+}
+
+.generate-idf-modal .close-btn {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.generate-idf-modal .close-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Add these styles to the end of your existing CSS file */
+
+.generate-idf-modal .file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.generate-idf-modal .file-item:last-child {
+  border-bottom: none;
+}
+
+.generate-idf-modal .file-item button {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.generate-idf-modal .file-item button i {
+  font-size: 0.75rem;
+}
+
+.generate-idf-modal .error-message {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}

@@ -1,0 +1,124 @@
+.btn-stl-3 {
+  background: white;
+  color: #000;
+  width: auto !important;
+  height: 30px;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 4px;
+  border-radius: 20px;
+  border: 1px solid #131312;
+  margin-right: 12px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.btn-stl-3:hover {
+  color: black;
+  background: linear-gradient(
+    90deg,
+    rgba(204, 253, 216, 1) 0%,
+    rgba(177, 220, 236, 1) 35%,
+    rgba(152, 190, 252, 1) 100%
+  );
+  border: none;
+  font-weight: 700;
+}
+
+.btn-stl-4 {
+  background: linear-gradient(
+    90deg,
+    rgba(204, 253, 216, 1) 0%,
+    rgba(177, 220, 236, 1) 35%,
+    rgba(152, 190, 252, 1) 100%
+  );
+  color: #000;
+  width: auto !important;
+  height: 30px;
+  padding: 5px 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 4px;
+  border-radius: 20px;
+  margin-right: 12px;
+  margin-top: 8px;
+  font-weight: 700;
+  border: none;
+}
+
+.btn-stl-4:hover {
+  border: 1px solid #131312;
+  background: white;
+  color: black;
+}
+
+.cont-nit {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #e7effa;
+  opacity: 0.8;
+  border-radius: 25px;
+}
+
+.textarea-stl {
+  background: #fbfaff;
+  opacity: 0.8;
+  border: none !important;
+  border-radius: 20px;
+}
+
+/* Select All toggle styling */
+.select-all-container {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.select-all-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #008cbf;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.select-all-label {
+  margin-left: 6px;
+  color: #008cbf;
+  font-size: 13px;
+  user-select: none;
+}
+
+/* Frozen option styling */
+.frozen-option {
+  position: relative;
+}
+
+.frozen-indicator {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  background-color: #008cbf;
+  color: white;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  pointer-events: none;
+}
+
+.header-with-select-all {
+  display: flex;
+  align-items: center;
+}

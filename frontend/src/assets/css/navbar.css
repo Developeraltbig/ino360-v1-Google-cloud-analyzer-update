@@ -1,0 +1,335 @@
+/* header */
+.header {
+  position: fixed;
+  width: 100%;
+  z-index: 3;
+  top: 0px;
+  padding: 15px 30px;
+  background-color: white;
+}
+
+.header .left-btn {
+  margin-left: 30px;
+}
+
+.header .right-btn {
+  margin-left: 30px;
+}
+
+.header ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+/* List item styling */
+.header li {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Link styling */
+.header li a {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 20px 17px;
+  text-decoration: none;
+  color: rgb(23, 24, 24);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.header li a:hover {
+  color: #44b9ff;
+}
+
+.header .logo {
+  display: block;
+  float: left;
+  font-size: 2em;
+  padding: 10px 20px;
+  text-decoration: none;
+}
+
+.logo-stl {
+  width: 145px;
+  height: 35px;
+}
+
+/* menu */
+.header .menu {
+  clear: both;
+  max-height: 0;
+  transition: max-height 0.2s ease-out;
+  display: flex;
+  align-items: center;
+}
+
+/* menu buttons */
+.header .navbar-action-button {
+  background: white;
+  color: #44b9ff;
+  width: 120px;
+  height: 42px;
+  padding: 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 4px;
+  cursor: pointer;
+  border-radius: 20px;
+  border: 1px solid #44b9ff;
+  margin-right: 12px;
+  margin-top: 8px;
+}
+
+.navbar-action-button:hover {
+  background: #44b9ff;
+  color: white;
+  font-weight: 600;
+}
+
+/* menu icon */
+.header .menu-icon {
+  cursor: pointer;
+  display: inline-block;
+  float: right;
+  padding: 28px 40px;
+  position: relative;
+  user-select: none;
+}
+
+.header .menu-icon .navicon {
+  background: #333;
+  display: block;
+  height: 2px;
+  position: relative;
+  width: 23px;
+}
+
+.header .menu-icon .navicon:before,
+.header .menu-icon .navicon:after {
+  background: #333;
+  content: "";
+  display: block;
+  height: 100%;
+  position: absolute;
+  transition: all 0.2s ease-out;
+  width: 100%;
+}
+
+.header .menu-icon .navicon:before {
+  top: 5px;
+}
+
+.header .menu-icon .navicon:after {
+  top: -5px;
+}
+
+/* menu btn */
+.header .menu-btn {
+  display: none;
+}
+
+.header .menu-btn:checked ~ .menu {
+  max-height: 240px;
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon {
+  background: transparent;
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon:before {
+  transform: rotate(-45deg);
+}
+
+.header .menu-btn:checked ~ .menu-icon .navicon:after {
+  transform: rotate(45deg);
+}
+
+.header .menu-btn:checked ~ .menu-icon:not(.steps) .navicon:before,
+.header .menu-btn:checked ~ .menu-icon:not(.steps) .navicon:after {
+  top: 0;
+}
+
+/* History button styling - improved with icon */
+.history-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px !important;
+  background: linear-gradient(to right, #e6f2ff, #c5e7ff);
+  color: #3586cb !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  margin: 0 20px 0 0;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(68, 185, 255, 0.2);
+  transition: all 0.3s ease;
+  border: 1px solid #c5e7ff;
+  font-size: 14px !important;
+  height: 36px;
+  vertical-align: middle;
+}
+
+.history-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(68, 185, 255, 0.3);
+  background: linear-gradient(to right, #d0ebff, #9fd8ff);
+  color: #2c70a9 !important;
+}
+
+.history-icon {
+  margin-right: 8px;
+  font-size: 15px;
+}
+
+/* User dropdown container */
+.user-dropdown-container {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  height: 100%;
+  margin-left: 20px;
+}
+
+.menu li.user-dropdown-container {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0;
+}
+
+/* Register link */
+.nav-div-register {
+  background-color: transparent;
+  color: white;
+  padding: 12px 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 4px;
+  cursor: pointer;
+  margin-top: 12px;
+  margin-left: 20px;
+}
+
+/* Specific fix for internal pages navbar alignment */
+.header .menu li a {
+  height: 45px;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure the profile container has the same height */
+.header .menu li.user-dropdown-container .profile-dropdown-container {
+  height: 60px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Align the profile trigger button vertically */
+.header .menu li.user-dropdown-container .profile-trigger {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Make sure avatar has the right vertical position */
+.header .menu li.user-dropdown-container .user-avatar {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Media queries */
+@media only screen and (min-width: 991px) {
+  .header li {
+    float: left;
+  }
+
+  .header .menu {
+    padding: 10px 0px;
+    clear: none;
+    float: right;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .header .menu-icon {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .header li a {
+    padding: 20px 10px;
+    font-size: 15px;
+  }
+
+  .header .logo {
+    padding: 10px 15px;
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  .history-button {
+    margin: 10px 0;
+    display: flex;
+    text-align: center;
+    width: fit-content;
+    height: 36px;
+  }
+
+  .menu li.user-dropdown-container {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 0;
+    position: static;
+  }
+
+  .user-dropdown-container {
+    margin-left: 0;
+  }
+
+  .pad-right {
+    padding-right: 50px !important;
+  }
+
+  .header .menu-btn:checked ~ .menu {
+    max-height: 240px;
+    overflow: visible !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .navbar a:not(:first-child) {
+    display: none;
+  }
+
+  .navbar a.icon {
+    float: right;
+    display: block;
+  }
+
+  .pad-right {
+    padding-right: 30px !important;
+  }
+
+  .header li a {
+    padding: 20px 5px;
+    font-size: 13px;
+  }
+}
+
+.pad-right {
+  padding-right: 100px;
+}
+

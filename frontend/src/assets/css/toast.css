@@ -1,0 +1,45 @@
+/* frontend/src/assets/css/toast.css */
+.toast {
+    min-width: 250px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    opacity: 0.98 !important;
+  }
+  
+  .toast-header {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .toast-body {
+    padding: 0.75rem;
+    font-size: 14px;
+  }
+  
+  .bg-success .toast-header {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .bg-danger .toast-header {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .bg-info .toast-header {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+  
+  .bg-warning .toast-header {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+  
+  /* Add these new styles to make text white on colored backgrounds */
+  .bg-success .toast-body,
+  .bg-danger .toast-body {
+    color: white !important;
+  }
+  

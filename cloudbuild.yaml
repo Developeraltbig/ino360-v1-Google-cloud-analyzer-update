@@ -1,0 +1,41 @@
+# cloudbuild.yaml (for Cloud Run)
+
+steps:
+# 1. Build the Docker container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build',
+    '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA',
+    '.'
+  ]
+
+# 2. Push the container image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA']
+
+# 3. Deploy the container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'gcloud'
+  args:
+    - 'run'
+    - 'deploy'
+    - '${_SERVICE_NAME}' # The name of your Cloud Run service
+    - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
+    - '--region=${_REGION}'
+    - '--platform=managed'
+    - '--allow-unauthenticated' # Makes your service publicly accessible
+    # Set environment variables securely. Add all required variables here.
+    - '--set-env-vars=MONGODB_URI=YOUR_MONGODB_ATLAS_CONNECTION_STRING,SERPAPI_KEY=YOUR_SERPAPI_KEY,GEMINI_API_KEY=YOUR_GEMINI_API_KEY'
+
+# Define substitution variables
+substitutions:
+  _SERVICE_NAME: 'ino360-service' # Choose a name for your app
+  _REPO_NAME: 'my-app-repo' # The name of your Artifact Registry repo from Part 2
+  _REGION: 'us-central1' # The region for your repo and Cloud Run service
+
+# Store the built image in Artifact Registry
+images:
+- '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:$COMMIT_SHA'
+
+# Set a timeout for the build
+timeout: '1600s'  

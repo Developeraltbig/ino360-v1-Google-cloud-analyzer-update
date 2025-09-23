@@ -1,0 +1,15 @@
+.form-parent {
+  margin-top: 30px;
+  padding: 30px;
+  background: rgb(231, 239, 250);
+  border-radius: 20px;
+}
+
+.form-parent label {
+  color: var(--dashui-form-label-color);
+  font-weight: 600;
+}
+
+.form-parent .form-control {
+  border: var(--bs-border-width) solid #bfbfbf;
+}

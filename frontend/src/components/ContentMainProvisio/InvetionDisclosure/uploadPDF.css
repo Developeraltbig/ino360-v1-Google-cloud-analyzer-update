@@ -1,0 +1,32 @@
+.bg-white-new {
+  background-color: transparent !important;
+}
+
+.head-stl {
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.quill {
+  border-radius: 10px;
+}
+
+.ql-snow {
+  border-radius: 15px 15px 0px 0px;
+}
+
+.ql-toolbar.ql-snow {
+  border: none !important;
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+}
+
+.left-cont {
+  background: rgb(231, 239, 250);
+  padding: 15px 5px 30px;
+  border-radius: 20px;
+  height: 650px;
+  overflow-y: scroll;
+}
