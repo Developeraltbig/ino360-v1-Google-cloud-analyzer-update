@@ -21,7 +21,7 @@ const ProvisionalDrafting = () => {
     setAnswer6("Generating Answer... It may take upto 10 secs...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAUrKHvLgqbCbmWzdQUBGUTcNQq35HuXRQ`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAUrKHvLgqbCbmWzdQUBGUTcNQq35HuXRQ`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: question6 }] }],

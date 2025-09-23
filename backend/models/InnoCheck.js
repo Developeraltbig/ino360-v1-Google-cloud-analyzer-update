@@ -49,8 +49,15 @@ const analyzeInventionSchema = new mongoose.Schema(
     keyFeatures: { type: String, required: false },
     queries: [{ type: String }],
     patentResults: [patentResultSchema],
-    selectedPatentIds: [patentResultSchema], // Changed to store full details
+    selectedPatentIds: [{ 
+      type: mongoose.Schema.Types.Mixed,
+    }],
     comparisons: [comparisonSchema],
+    searchQueries: [{
+      type: { type: String, required: false },
+      query: { type: String, required: false },
+      step: { type: String, required: false }
+    }]
   },
   { _id: false }
 );

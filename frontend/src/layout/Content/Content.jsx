@@ -814,7 +814,7 @@ const Content = () => {
     setAnswer("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -838,7 +838,7 @@ const Content = () => {
     setAnswer2("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -862,7 +862,7 @@ const Content = () => {
     setAnswer3("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -886,7 +886,7 @@ const Content = () => {
     setAnswer4("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -910,7 +910,7 @@ const Content = () => {
     setAnswer5("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-latest:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -934,7 +934,7 @@ const Content = () => {
     setAnswer6("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -958,7 +958,7 @@ const Content = () => {
     setAnswer7("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -982,7 +982,7 @@ const Content = () => {
     setAnswer8("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1006,7 +1006,7 @@ const Content = () => {
     setAnswer9("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1030,7 +1030,7 @@ const Content = () => {
     setAnswer10("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
@@ -1054,7 +1054,7 @@ const Content = () => {
     setAnswer11("Generating Answer... Wait for a while...");
     try {
       const response = await axios({
-        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyDNyQ0nrCUGkZs60tGTsi7PxpNldEjBdcM`,
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAH_FfuPV1O3rx37YHVBw2c_fV3CTvE-RM`,
         method: "post",
         data: {
           contents: [{ parts: [{ text: questionText }] }],
