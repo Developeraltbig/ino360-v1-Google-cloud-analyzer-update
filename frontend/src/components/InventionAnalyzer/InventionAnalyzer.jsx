@@ -876,78 +876,97 @@ const InventionAnalyzer = forwardRef((props, ref) => {
                     return <p>No patent results available to summarize.</p>;
                   }
 
+// ... inside the InventionAnalyzer component, within the "Results Summary" section
+
                   // 5. Render the table dynamically
-const itemsPerRow = 3;
-const numRows = Math.ceil(
-  displayedResults.length / itemsPerRow
-);
+                  const itemsPerRow = 3;
+                  const numRows = Math.ceil(
+                    displayedResults.length / itemsPerRow
+                  );
 
-// Create a counter to track which scholar result we're displaying
-let scholarResultCounter = 0;
+                  // FIX START: Pre-calculate scholar numbers to avoid side effects during render
+                  const scholarNumberMap = new Map();
+                  let currentScholarNumber = 1;
+                  displayedResults.forEach(result => {
+                    if (result.is_scholar) {
+                      // Use a unique ID for the scholar result as the key
+                      const scholarKey = result.scholar_id || JSON.stringify(result); // Fallback key
+                      if (!scholarNumberMap.has(scholarKey)) {
+                        scholarNumberMap.set(scholarKey, currentScholarNumber++);
+                      }
+                    }
+                  });
+                  // FIX END
 
-return (
-  <table className="analyzer-table patent-summary-table">
-    <tbody>
-      {[...Array(numRows)].map((_, rowIndex) => (
-        <tr key={`summary-row-${rowIndex}`}>
-          {[...Array(itemsPerRow)].map((_, colIndex) => {
-            const resultIndex =
-              rowIndex * itemsPerRow + colIndex;
-            if (resultIndex < displayedResults.length) {
-              const result = displayedResults[resultIndex];
-              const isScholar = result.is_scholar;
-              
-              // For scholars, use "Scholar Res X" format instead of the ID
-              let displayText;
-              if (isScholar) {
-                // Increment counter only for scholar results
-                scholarResultCounter++;
-                displayText = `Scholar Res ${scholarResultCounter}`;
-              } else {
-                displayText = extractPatentNumber(result.patent_id || "");
-              }
+                  // REMOVED: let scholarResultCounter = 0;
 
-              const link = isScholar
-                ? result.scholar_link || "#"
-                : result.patent_id
-                ? `https://patents.google.com/${result.patent_id}`
-                : "#";
+                  return (
+                    <table className="analyzer-table patent-summary-table">
+                      <tbody>
+                        {[...Array(numRows)].map((_, rowIndex) => (
+                          <tr key={`summary-row-${rowIndex}`}>
+                            {[...Array(itemsPerRow)].map((_, colIndex) => {
+                              const resultIndex =
+                                rowIndex * itemsPerRow + colIndex;
+                              if (resultIndex < displayedResults.length) {
+                                const result = displayedResults[resultIndex];
+                                const isScholar = result.is_scholar;
 
-              return (
-                <td key={`summary-cell-${resultIndex}`}>
-                  {link !== "#" ? (
-                    <a
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="patent-number-link"
-                      title={`View ${
-                        isScholar
-                          ? "Scholar Result"
-                          : "Patent"
-                      }: ${isScholar ? displayText : displayText}`}
-                    >
-                      {displayText}
-                    </a>
-                  ) : (
-                    displayText
-                  )}
-                </td>
-              );
-            } else {
-              // Render empty cell if no more results for this row
-              return (
-                <td
-                  key={`summary-cell-empty-${resultIndex}`}
-                ></td>
-              );
-            }
-          })}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
+                                let displayText;
+                                if (isScholar) {
+                                  // FIX START: Use the pre-calculated map for a stable number
+                                  const scholarKey = result.scholar_id || JSON.stringify(result);
+                                  const scholarNum = scholarNumberMap.get(scholarKey);
+                                  displayText = `Scholar Res ${scholarNum}`;
+                                  // FIX END
+                                } else {
+                                  displayText = extractPatentNumber(
+                                    result.patent_id || ""
+                                  );
+                                }
+
+                                const link = isScholar
+                                  ? result.scholar_link || "#"
+                                  : result.patent_id
+                                  ? `https://patents.google.com/${result.patent_id}`
+                                  : "#";
+
+                                return (
+                                  <td key={`summary-cell-${resultIndex}`}>
+                                    {link !== "#" ? (
+                                      <a
+                                        href={link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="patent-number-link"
+                                        title={`View ${
+                                          isScholar
+                                            ? "Scholar Result"
+                                            : "Patent"
+                                        }: ${displayText}`}
+                                      >
+                                        {displayText}
+                                      </a>
+                                    ) : (
+                                      displayText
+                                    )}
+                                  </td>
+                                );
+                              } else {
+                                // Render empty cell if no more results for this row
+                                return (
+                                  <td
+                                    key={`summary-cell-empty-${resultIndex}`}
+                                  ></td>
+                                );
+                              }
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  );
+// ... rest of the component
                 })() // Immediately invoke the function
               ) : (
                 <p>No patent results available to summarize.</p>
