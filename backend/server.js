@@ -1328,6 +1328,7 @@ async function generateInventionTitle(text) {
           temperature: 0.6,
           topP: 0.9,
           topK: 40,
+          maxOutputTokens: 50, // Limit tokens for title
           // stopSequences: ["\n"] // Stop at newline if title is single line
         },
       },
