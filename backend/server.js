@@ -1280,7 +1280,7 @@ app.post("/chat", async (req, res) => {
 
     // Send the prompt to the Gemini API
     const response = await axios.post(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
         GEMINI_API_KEY,
       {
         contents: [{ parts: [{ text: prompt }] }],
@@ -1315,7 +1315,7 @@ async function generateInventionTitle(text) {
     // Ensure GEMINI_API_KEY is accessible here (it should be from your setup)
     // Ensure axios is imported at the top of the file
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         contents: [{ parts: [{ text: prompt }] }],
         // Optional: Add safety settings if needed
@@ -1328,7 +1328,6 @@ async function generateInventionTitle(text) {
           temperature: 0.6,
           topP: 0.9,
           topK: 40,
-          maxOutputTokens: 50, // Limit tokens for title
           // stopSequences: ["\n"] // Stop at newline if title is single line
         },
       },
@@ -1441,7 +1440,7 @@ app.get("/api/getPdfText", async (req, res) => {
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(geminiApiKey);
 const geminiModel = genAI.getGenerativeModel({
-  // Note: You mentioned earlier "gemini-1.5-pro" but if you need the newer version, adjust here.
+  // Note: You mentioned earlier "gemini-2.5-pro" but if you need the newer version, adjust here.
   model: "gemini-2.5-pro",
 });
 // Add new model for flash version
