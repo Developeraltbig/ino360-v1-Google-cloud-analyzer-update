@@ -2799,51 +2799,15 @@ function parsePrompt3Output(output, patentId) {
   return { matrix, excerpts };
 }
 
-
-/**
- * NEW HELPER FUNCTION to generate key features from text.
- * This replaces the incorrect call to generatePrompt4.
- */
-function generateKeyFeaturesPrompt(inventionText) {
-  return `Based on the following invention description, extract and list the key technical features. The features should be detailed, specific, and structured hierarchically if possible (e.g., using 1, 1.1, 1.2, 2, 2.1). Focus on the core components, their functions, and their interconnections. Do not add any introductory text or summaries. Just provide the list of features.
-
-  INVENTION TEXT:
-  ---
-  ${inventionText}
-  ---
-  `;
-}
-// REPLACE your existing /api/process-invention endpoint with this corrected version
-
+// --- Main Endpoint (Iteration 3) ---
+// --- Main Endpoint (Asynchronous Version) ---
+// Replace the existing /api/process-invention endpoint in server.js
 app.post("/api/process-invention", async (req, res) => {
   try {
-    // --- CHANGE START ---
-    // 1. Updated to accept fields from localStorage (pdfText, answerInnoCheck, etc.)
-    const {
-      pdfText,
-      keyFeatures,
-      answerInnoCheck6,
-      answerInnoCheck7,
-      answerInnoCheck8,
-      answerInnoCheck9,
-    } = req.body;
-
-    // 2. Validate using pdfText instead of inventionText
-    if (!pdfText) {
-      return res.status(400).json({ error: "pdfText from the invention is required" });
+    const { inventionText, keyFeatures } = req.body;
+    if (!inventionText) {
+      return res.status(400).json({ error: "inventionText is required" });
     }
-
-    // 3. Combine all text inputs into a single comprehensive block for analysis
-    const inventionText = [
-      pdfText,
-      answerInnoCheck6,
-      answerInnoCheck7,
-      answerInnoCheck8,
-      answerInnoCheck9,
-    ]
-      .filter(Boolean) // Remove any null/undefined/empty strings
-      .join("\n\n---\n\n"); // Separate sections clearly
-    // --- CHANGE END ---
 
     const startTime = performance.now();
     console.log(`[Process Invention] Starting invention analysis at ${new Date().toISOString()}`);
@@ -2859,10 +2823,7 @@ app.post("/api/process-invention", async (req, res) => {
         .replace(/\s+/g, " ")
         .trim();
     } else {
-      // --- BUG FIX ---
-      // Correctly call the new function to generate key features
-      const keyFeaturesPrompt = generateKeyFeaturesPrompt(inventionText);
-      // --- END BUG FIX ---
+      const keyFeaturesPrompt = generatePrompt4(inventionText); 
       const geminiResponseFeatures = await runGeminiPrompt(keyFeaturesPrompt, true);
       processedKeyFeatures = geminiResponseFeatures
         .replace(/<[^>]+>/g, " ")
@@ -2870,8 +2831,6 @@ app.post("/api/process-invention", async (req, res) => {
         .trim();
     }
 
-    // (The rest of the function remains the same as your original code)
-    
     // Step 2: Generate Search Queries (TWO SETS)
     console.log(`[Process Invention] Step 2 - Generating Search Queries`);
     const prompt1 = generatePrompt1(inventionText);
@@ -2923,7 +2882,7 @@ app.post("/api/process-invention", async (req, res) => {
           const results = await searchPatents(query, 20);
           return results;
         } catch (queryError) {
-          console.error(`Error in query \"${query}\":`, queryError.message);
+          console.error(`Error in query "${query}":`, queryError.message);
           return [];
         }
       })
@@ -2980,7 +2939,7 @@ app.post("/api/process-invention", async (req, res) => {
               const results = await searchPatents(query, 20);
               return results;
             } catch (error) {
-              console.error(`Error in CPC query \"${query}\":`, error.message);
+              console.error(`Error in CPC query "${query}":`, error.message);
               return [];
             }
           })
