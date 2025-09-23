@@ -461,14 +461,15 @@ export default function Projects() {
             localStorage.setItem("selectedButtons", JSON.stringify(innoCheckData.selected_buttons));
           }
           
-          // Set flag to trigger component rendering
-          localStorage.setItem("generateButtonClicked_innoCheckNext", "true");
+          // REMOVE THE FOLLOWING LINE. IT IS THE SOURCE OF THE BUG.
+          // localStorage.setItem("generateButtonClicked_innoCheckNext", "true");
         }
       } catch (innoCheckError) {
         console.warn("Error fetching InnoCheck data:", innoCheckError);
         // Continue navigation even if fetch fails
       }
     }
+
 
     // Set flag to indicate navigation from Projects page
 localStorage.setItem("navigatedFromProjects", "true");
