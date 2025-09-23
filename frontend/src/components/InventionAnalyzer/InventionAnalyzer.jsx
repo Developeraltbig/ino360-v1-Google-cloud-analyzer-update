@@ -592,15 +592,33 @@ const InventionAnalyzer = forwardRef((props, ref) => {
         const statusData = await response.json();
         setProgress(statusData.progress);
 
-        if (statusData.progress == 25) {
-          setProgressMessage(`Understanding the invention`);
-        } else if (statusData.progress == 40) {
-          setProgressMessage(`Searching relevant Patents/NPL`);
-        } else if (statusData.progress == 60) {
-          setProgressMessage(`Comparing with invention`);
-        } else {
-          setProgressMessage(`Generating Comparison Matrices`);
-        }
+if (statusData.progress <= 10) {
+  setProgressMessage(`Analyzing your invention`);
+} else if (statusData.progress <= 25) {
+  setProgressMessage(`Searching patent databases`);
+} else if (statusData.progress <= 35) {
+  setProgressMessage(`Reviewing search results`);
+} else if (statusData.progress <= 50) {
+  setProgressMessage(`Identifying most relevant patents`);
+} else if (statusData.progress <= 60) {
+  setProgressMessage(`Comparing with your invention`);
+} else if (statusData.progress <= 70) {
+  setProgressMessage(`Generating detailed comparisons`);
+} else if (statusData.progress <= 78) {
+  setProgressMessage(`Finding related patents`);
+} else if (statusData.progress <= 82) {
+  setProgressMessage(`Analyzing patent connections`);
+} else if (statusData.progress <= 86) {
+  setProgressMessage(`Exploring citation networks`);
+} else if (statusData.progress <= 88) {
+  setProgressMessage(`Evaluating additional references`);
+} else if (statusData.progress <= 92) {
+  setProgressMessage(`Finalizing patent selection`);
+} else if (statusData.progress <= 95) {
+  setProgressMessage(`Completing analysis`);
+} else {
+  setProgressMessage(`Preparing your report`);
+}
 
         if (statusData.status === "completed") {
           clearInterval(pollingInterval);
@@ -808,6 +826,104 @@ const InventionAnalyzer = forwardRef((props, ref) => {
               })()}
             </div>
           </div>
+
+{resultData && resultData.searchQueries && resultData.searchQueries.length > 0 && (
+  <div className="analyzer-section">
+    <h3 className="analyzer-heading">Search Strategy & Queries Used</h3>
+    <h5 className="patent-title-heading">
+      Complete list of search queries executed to find relevant prior art
+    </h5>
+    <div className="search-queries-container">
+      {(() => {
+        // Group queries by type
+        const groupedQueries = resultData.searchQueries.reduce((acc, query) => {
+          if (!acc[query.step]) {
+            acc[query.step] = [];
+          }
+          acc[query.step].push(query);
+          return acc;
+        }, {});
+
+        return Object.entries(groupedQueries).map(([step, queries]) => (
+          <div key={step} className="query-group" style={{
+            marginBottom: "25px",
+            padding: "15px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "8px",
+            border: "1px solid #e9ecef"
+          }}>
+            <h4 style={{
+              color: "#36718b",
+              fontSize: "14px",
+              fontWeight: "600",
+              marginBottom: "12px",
+              borderBottom: "1px solid #dee2e6",
+              paddingBottom: "8px"
+            }}>
+              {step}
+            </h4>
+            <div className="queries-list">
+              {queries.map((queryItem, index) => (
+                <div key={index} style={{
+                  marginBottom: "10px",
+                  padding: "10px",
+                  backgroundColor: "white",
+                  borderRadius: "4px",
+                  border: "1px solid #dee2e6"
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "10px"
+                  }}>
+                    <span style={{
+                      backgroundColor: queryItem.type === "Primary Search" ? "#2196f3" : 
+                                       queryItem.type === "Expanded Search" ? "#4caf50" : 
+                                       "#ff9800",
+                      color: "white",
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      fontSize: "10px",
+                      fontWeight: "600",
+                      whiteSpace: "nowrap",
+                      marginTop: "2px"
+                    }}>
+                      {queryItem.type}
+                    </span>
+                    <code style={{
+                      flex: 1,
+                      fontFamily: "Monaco, Consolas, 'Courier New', monospace",
+                      fontSize: "12px",
+                      color: "#333",
+                      backgroundColor: "#f5f5f5",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      wordBreak: "break-word"
+                    }}>
+                      {queryItem.query}
+                    </code>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ));
+      })()}
+    </div>
+    <div style={{
+      marginTop: "15px",
+      padding: "12px",
+      backgroundColor: "#e8f4f8",
+      borderRadius: "6px",
+      fontSize: "12px",
+      color: "#555"
+    }}>
+      <strong>Note:</strong> These queries were automatically generated and executed across multiple patent databases 
+      to ensure comprehensive prior art coverage. The system uses advanced query optimization techniques including 
+      classification-based refinement and citation network analysis.
+    </div>
+  </div>
+)}
 
           <div className="analyzer-section">
             <h3 className="analyzer-heading">Results Summary</h3>

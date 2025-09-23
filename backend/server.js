@@ -1574,6 +1574,582 @@ async function searchPatents(query, num = 20) {
   }
 }
 
+// Add this new function after searchPatents
+function extractTopCPCCodes(patentResults, topN = 2) {
+  const cpcCount = {};
+  patentResults.forEach(result => {
+    // SERP API returns CPC in organic_results
+    if (result.cpc) {
+      // Extract main CPC classification (e.g., "A47J" from "A47J31/00")
+      const mainCPC = result.cpc.split(/[\/\s]/)[0];
+      cpcCount[mainCPC] = (cpcCount[mainCPC] || 0) + 1;
+    }
+  });
+  
+  // Return top N CPC codes by frequency
+  return Object.entries(cpcCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, topN)
+    .map(([cpc]) => cpc);
+}
+
+// Add these citation analysis functions after parsePrompt4Output
+
+/**
+ * Extract citations from top patents
+ */
+function extractCitationPool(comparisons, top30Details, level = 1) {
+  // Get top 3 strongest patents based on metrics
+  const sortedByStrength = [...comparisons]
+    .filter(comp => comp.metrics)
+    .sort((a, b) => {
+      const scoreA = (a.metrics.considerable * 2) + a.metrics.partial;
+      const scoreB = (b.metrics.considerable * 2) + b.metrics.partial;
+      return scoreB - scoreA;
+    })
+    .slice(0, 3); // Top 3 strongest
+  
+  const citationMap = new Map();
+  const convergenceCount = new Map();
+  const processedFamilies = new Set();
+  
+  // Collect family IDs of current patents
+  comparisons.forEach(comp => {
+    const details = top30Details.find(d => d.patentId === comp.patentId);
+    if (details?.details?.family_id) {
+      processedFamilies.add(details.details.family_id);
+    }
+  });
+  
+  // Extract citations from top patents
+  sortedByStrength.forEach(comp => {
+    const patentDetails = top30Details.find(d => d.patentId === comp.patentId);
+    if (!patentDetails?.details?.citations) return;
+    
+    const citations = patentDetails.details.citations;
+    
+    // Add forward citations
+    citations.forward.forEach(citation => {
+      const citationFamilyId = citation.family_id || 'unknown_' + citation.patent_id;
+      
+      // Track convergence
+      convergenceCount.set(citation.patent_id, 
+        (convergenceCount.get(citation.patent_id) || 0) + 1);
+      
+      if (!citationMap.has(citation.patent_id) && 
+          !processedFamilies.has(citationFamilyId)) {
+        citationMap.set(citation.patent_id, {
+          ...citation,
+          source: comp.patentId,
+          direction: 'forward',
+          level: level,
+          convergenceScore: 0 // Will update after
+        });
+      }
+    });
+    
+    // Add backward citations (limit to 10 per patent)
+    citations.backward.slice(0, 10).forEach(citation => {
+      const citationFamilyId = citation.family_id || 'unknown_' + citation.patent_id;
+      
+      convergenceCount.set(citation.patent_id, 
+        (convergenceCount.get(citation.patent_id) || 0) + 1);
+      
+      if (!citationMap.has(citation.patent_id) && 
+          !processedFamilies.has(citationFamilyId)) {
+        citationMap.set(citation.patent_id, {
+          ...citation,
+          source: comp.patentId,
+          direction: 'backward',
+          level: level,
+          convergenceScore: 0
+        });
+      }
+    });
+  });
+  
+  // Update convergence scores
+  citationMap.forEach((citation, patentId) => {
+    citation.convergenceScore = convergenceCount.get(patentId) || 1;
+  });
+  
+  // Sort by convergence score
+  return Array.from(citationMap.values())
+    .sort((a, b) => b.convergenceScore - a.convergenceScore);
+}
+
+// Add this new function
+async function fetchSecondLevelCitations(firstLevelCitations, jobId) {
+  const startTime = performance.now();
+  console.log(`[Second Level Citations][${jobId}] Starting second level citation fetch`);
+  
+  try {
+    // Take top 5 first-level citations
+    const topCitations = firstLevelCitations.slice(0, 5);
+    
+    // Fetch their details in parallel
+    const detailsPromises = topCitations.map(async (citation) => {
+      try {
+        const details = await getPatentDetails(citation.patent_id);
+        return {
+          parentId: citation.patent_id,
+          citations: details.citations || { forward: [], backward: [] }
+        };
+      } catch (error) {
+        console.error(`Error fetching details for ${citation.patent_id}:`, error);
+        return null;
+      }
+    });
+    
+    const citationDetails = (await Promise.all(detailsPromises)).filter(Boolean);
+    
+    // Extract second-level citations
+    const secondLevelMap = new Map();
+    const processedFamilies = new Set();
+    
+    citationDetails.forEach(({ parentId, citations }) => {
+      // Only forward citations for second level (to limit volume)
+      citations.forward.slice(0, 8).forEach(citation => {
+        const citationFamilyId = citation.family_id || 'unknown_' + citation.patent_id;
+        
+        if (!secondLevelMap.has(citation.patent_id) && 
+            !processedFamilies.has(citationFamilyId)) {
+          secondLevelMap.set(citation.patent_id, {
+            ...citation,
+            source: parentId,
+            direction: 'forward',
+            level: 2,
+            convergenceScore: 0
+          });
+          processedFamilies.add(citationFamilyId);
+        }
+      });
+    });
+    
+    const endTime = performance.now();
+    console.log(
+      `[Second Level Citations][${jobId}] Fetched ${secondLevelMap.size} second-level citations in ${((endTime - startTime) / 1000).toFixed(2)}s`
+    );
+    
+    return Array.from(secondLevelMap.values());
+  } catch (error) {
+    console.error(`[Second Level Citations][${jobId}] Error:`, error);
+    return [];
+  }
+}
+
+/**
+ * Generate citation screening prompt
+ */
+function generatePrompt_CitationScreening(keyFeatures, citationsText, level = 1) {
+  return `You are an expert patent examiner evaluating ${level === 1 ? 'direct' : 'second-level'} citation relevance. Given the key features of an invention and a list of ${level === 1 ? 'cited' : 'second-degree'} patents, identify the ${level === 1 ? '25' : '15'} most technically relevant citations.
+
+KEY FEATURES OF THE INVENTION:
+${keyFeatures}
+
+EVALUATION CRITERIA:
+- Direct technical overlap with key features
+- Problem-solution correspondence
+- Implementation methodology similarity
+- Component and architecture alignment
+${level === 2 ? '- Consider that these are second-degree citations (citations of citations)' : ''}
+- Prioritize convergence patents (cited by multiple sources)
+- Avoid redundant patents covering identical concepts
+
+CITATION PATENTS:
+${citationsText}
+
+OUTPUT REQUIREMENTS:
+You must output EXACTLY ${level === 1 ? '25' : '15'} patent IDs in order of relevance. Each line must follow this exact pattern:
+<cite>[NUMBER]. patent/[PUBLICATION_NUMBER]/en</cite>
+
+Example format:
+<cite>1. patent/US1234567B2/en</cite>
+<cite>2. patent/EP1234567B1/en</cite>
+... (continuing to exactly ${level === 1 ? '25' : '15'})
+
+Remember: Output exactly ${level === 1 ? '25' : '15'} citations in the specified format.`;
+}
+
+/**
+ * Parse citation screening output
+ */
+function parseCitationScreening(output, expectedCount = 20) {
+  const citations = [];
+  const citePattern = /<cite>(\d+)\.\s*(patent\/[^<]+)<\/cite>/g;
+  let match;
+  
+  while ((match = citePattern.exec(output)) !== null) {
+    citations.push(match[2].trim());
+  }
+  
+  if (citations.length !== expectedCount) {
+    console.warn(`Expected ${expectedCount} citations but got ${citations.length}`);
+  }
+  
+  return citations.slice(0, expectedCount);
+}
+
+/**
+ * Generate combined re-selection prompt
+ */
+function generatePrompt_Final10Selection(keyFeatures, inventionText, allPatentsWithDescriptions) {
+  return `You are a patent prior art analyst performing final selection. You have approximately 45 patents (5 initial + 25 first-level citations + 15 second-level citations) and must choose the absolute best 10 prior art references.
+
+INVENTION KEY FEATURES:
+${keyFeatures}
+
+INVENTION DESCRIPTION:
+${inventionText}
+
+SELECTION METHODOLOGY:
+1. Comprehensive feature coverage - patents covering most key features
+2. Technical depth - detailed disclosure of implementation
+3. Citation importance - prioritize convergence patents (cited by multiple sources)
+4. Citation level diversity - include mix of original, first-level, and second-level citations
+5. Priority date advantage - earlier filing dates are valuable
+6. Avoid family duplicates - diversify across patent families
+
+THE CANDIDATE PATENTS (each with 50K chars):
+${allPatentsWithDescriptions}
+
+CRITICAL REQUIREMENTS:
+- Select exactly 10 patents that provide the best prior art coverage
+- Ensure at least 3 are from the original 5 if they're strong
+- Include convergence patents (cited by multiple sources) when relevant
+- Balance between direct matches and foundational patents
+- Consider both breadth and depth of technical overlap
+
+Output EXACTLY 10 patent IDs in order of relevance, each on its own line within h1 tags:
+<h1>patent/[PUBLICATION_NUMBER]/en</h1>
+
+Example:
+<h1>patent/US1234567B2/en</h1>
+<h1>patent/EP1234567B1/en</h1>
+(continue for exactly 10 patents)`;
+}
+
+// Add this new citation enhancement function
+async function processCitationEnhancement(
+  comparisons,
+  keyFeatures,
+  inventionText,
+  top30Details,
+  allResults,
+  jobId,
+  searchQueriesLog // Add this parameter
+) {
+  const enhancementStart = performance.now();
+  console.log(`[Citation Enhancement][${jobId}] Starting 2-level citation enhancement`);
+  
+  try {
+    // Step 1: Extract first-level citations
+    const firstLevelCitations = extractCitationPool(comparisons, top30Details, 1);
+    console.log(`[Citation Enhancement][${jobId}] First-level citation pool size: ${firstLevelCitations.length}`);
+    
+    if (firstLevelCitations.length === 0) {
+      console.log(`[Citation Enhancement][${jobId}] No citations found, returning original results`);
+      return {
+        enhancedComparisons: comparisons,
+        additionalCitations: []
+      };
+    }
+    
+    // Log citation extraction
+    searchQueriesLog.push({
+      type: "Citation Network Analysis",
+      query: `Extracted ${firstLevelCitations.length} first-level citations from top ${comparisons.slice(0, 3).length} patents`,
+      step: "Citation Enhancement - Level 1"
+    });
+    
+    // Step 2: Screen first-level citations to 25
+    const firstLevelText = firstLevelCitations
+      .slice(0, 100)
+      .map(c => `Patent ID: ${c.patent_id}, Title: ${c.title}, Convergence: ${c.convergenceScore}, Priority: ${c.priority_date || 'N/A'}`)
+      .join(' || ');
+    
+    const firstLevelPrompt = generatePrompt_CitationScreening(keyFeatures, firstLevelText, 1);
+    console.log(`[Citation Enhancement][${jobId}] Screening first-level citations`);
+    
+    const firstLevelResponse = await runGeminiPrompt(firstLevelPrompt);
+    const topFirstLevelIds = parseCitationScreening(firstLevelResponse, 25);
+    console.log(`[Citation Enhancement][${jobId}] Selected ${topFirstLevelIds.length} first-level citations`);
+    
+    // Log screening
+    searchQueriesLog.push({
+      type: "Citation Screening",
+      query: `Selected top ${topFirstLevelIds.length} most relevant citations from ${firstLevelCitations.length} candidates`,
+      step: "Citation Enhancement - Level 1 Screening"
+    });
+    
+    // Step 3: Fetch second-level citations (parallel with first-level detail fetch)
+    const [firstLevelDetails, secondLevelCitations] = await Promise.all([
+      // Fetch details for first-level citations
+      Promise.all(topFirstLevelIds.slice(0, 25).map(async (patentId) => {
+        const details = await getPatentDetails(patentId);
+        return {
+          patentId,
+          details,
+          description: details.fullDescription || '',
+          descriptionLink: details.descriptionLink || '',
+          level: 1
+        };
+      })),
+      // Fetch second-level citations
+      fetchSecondLevelCitations(firstLevelCitations, jobId)
+    ]);
+    
+    console.log(`[Citation Enhancement][${jobId}] Fetched ${firstLevelDetails.length} first-level details`);
+    console.log(`[Citation Enhancement][${jobId}] Fetched ${secondLevelCitations.length} second-level citations`);
+    
+    // Log second-level extraction
+    if (secondLevelCitations.length > 0) {
+      searchQueriesLog.push({
+        type: "Citation Network Analysis",
+        query: `Extracted ${secondLevelCitations.length} second-level citations from top first-level patents`,
+        step: "Citation Enhancement - Level 2"
+      });
+    }
+    
+    // Step 4: Screen second-level citations to 15
+    let topSecondLevelDetails = [];
+    if (secondLevelCitations.length > 0) {
+      const secondLevelText = secondLevelCitations
+        .slice(0, 60)
+        .map(c => `Patent ID: ${c.patent_id}, Title: ${c.title}, Source: ${c.source}`)
+        .join(' || ');
+      
+      const secondLevelPrompt = generatePrompt_CitationScreening(keyFeatures, secondLevelText, 2);
+      console.log(`[Citation Enhancement][${jobId}] Screening second-level citations`);
+      
+      const secondLevelResponse = await runGeminiPrompt(secondLevelPrompt);
+      const topSecondLevelIds = parseCitationScreening(secondLevelResponse, 15);
+      
+      // Log second-level screening
+      searchQueriesLog.push({
+        type: "Citation Screening",
+        query: `Selected top ${topSecondLevelIds.length} most relevant second-level citations`,
+        step: "Citation Enhancement - Level 2 Screening"
+      });
+      
+      // Fetch details for second-level citations
+      topSecondLevelDetails = await Promise.all(
+        topSecondLevelIds.slice(0, 15).map(async (patentId) => {
+          const details = await getPatentDetails(patentId);
+          return {
+            patentId,
+            details,
+            description: details.fullDescription || '',
+            descriptionLink: details.descriptionLink || '',
+            level: 2
+          };
+        })
+      );
+      
+      console.log(`[Citation Enhancement][${jobId}] Fetched ${topSecondLevelDetails.length} second-level details`);
+    }
+    
+    // Step 5: Combined selection of 10 from all candidates
+    // Build descriptions for all patents (original 5 + 25 first-level + 15 second-level)
+    const originalDescriptions = comparisons.map(comp => {
+      const patentData = top30Details.find(d => d.patentId === comp.patentId);
+      const description = (patentData?.description || patentData?.details?.abstract || '').substring(0, 50000);
+      return `[ORIGINAL SELECTION - Rank ${comp.rank || 'N/A'}]
+Patent ID: ${comp.patentId}
+Title: ${comp.details?.title || 'N/A'}
+Filing Date: ${comp.details?.filing_date || 'N/A'}
+Strength Score: ${(comp.metrics?.considerable * 2 + comp.metrics?.partial) || 0}
+Partial Description (50K chars): ${description}`;
+    }).join('\n\n---\n\n');
+    
+    const firstLevelDescriptions = firstLevelDetails.map(c => {
+      const description = (c.description || c.details.abstract || '').substring(0, 50000);
+      const convergenceInfo = firstLevelCitations.find(fc => fc.patent_id === c.patentId);
+      return `[FIRST-LEVEL CITATION${convergenceInfo?.convergenceScore > 1 ? ' - CONVERGENCE PATENT' : ''}]
+Patent ID: ${c.patentId}
+Title: ${c.details.title || 'N/A'}
+Filing Date: ${c.details.filing_date || 'N/A'}
+${convergenceInfo?.convergenceScore > 1 ? `Cited by ${convergenceInfo.convergenceScore} patents` : ''}
+Partial Description (50K chars): ${description}`;
+    }).join('\n\n---\n\n');
+    
+    const secondLevelDescriptions = topSecondLevelDetails.map(c => {
+      const description = (c.description || c.details.abstract || '').substring(0, 50000);
+      return `[SECOND-LEVEL CITATION]
+Patent ID: ${c.patentId}
+Title: ${c.details.title || 'N/A'}
+Filing Date: ${c.details.filing_date || 'N/A'}
+Partial Description (50K chars): ${description}`;
+    }).join('\n\n---\n\n');
+    
+    const allDescriptions = [originalDescriptions, firstLevelDescriptions, secondLevelDescriptions]
+      .filter(d => d.length > 0)
+      .join('\n\n---\n\n');
+    
+    const selectionPrompt = generatePrompt_Final10Selection(
+      keyFeatures,
+      inventionText,
+      allDescriptions
+    );
+    
+    console.log(`[Citation Enhancement][${jobId}] Running final selection of 10 from ~45 candidates`);
+    const selectionResponse = await runGeminiPrompt(selectionPrompt);
+    
+    // Parse final 10 selections
+    const final10Ids = [];
+    const h1Pattern = /<h1>(.*?)<\/h1>/g;
+    let match;
+    while ((match = h1Pattern.exec(selectionResponse)) !== null) {
+      final10Ids.push(match[1].trim());
+    }
+    
+    console.log(`[Citation Enhancement][${jobId}] Final 10 selected: ${final10Ids.join(', ')}`);
+    
+    // Log final selection
+    searchQueriesLog.push({
+      type: "Final Selection",
+      query: `Selected final ${final10Ids.length} patents from ~${comparisons.length + firstLevelDetails.length + topSecondLevelDetails.length} candidates`,
+      step: "Citation Enhancement - Final Selection"
+    });
+    
+    // Step 6: Generate matrices for all 10 (not just new ones)
+    const finalComparisons = [];
+    const additionalCitations = [];
+    const allCitationDetails = [...firstLevelDetails, ...topSecondLevelDetails];
+    
+    for (const patentId of final10Ids) {
+      // Check if we already have this comparison
+      const existingComp = comparisons.find(c => c.patentId === patentId);
+      
+      if (existingComp) {
+        finalComparisons.push(existingComp);
+      } else {
+        // Find in citation details
+        const citationData = allCitationDetails.find(c => c.patentId === patentId);
+        
+        if (citationData) {
+          console.log(`[Citation Enhancement][${jobId}] Generating matrix for citation: ${patentId}`);
+          
+          const prompt3 = generatePrompt3(keyFeatures, citationData.description);
+          const matrixResponse = await runGeminiPrompt(prompt3);
+          const parsed = parsePrompt3Output(matrixResponse, patentId);
+          
+          // Count metrics
+          const matrixRows = parsed.matrix.split('\n').filter(line => line.includes('|'));
+          let considerable = 0, partial = 0;
+          matrixRows.forEach(row => {
+            if (row.includes('Considerable')) considerable++;
+            if (row.includes('Partial')) partial++;
+          });
+          
+          finalComparisons.push({
+            patentId,
+            details: {
+              title: citationData.details.title,
+              assignee: citationData.details.assignee,
+              filing_date: citationData.details.filing_date,
+              inventor: citationData.details.inventor,
+              abstract: citationData.details.abstract,
+              snippet: citationData.details.abstract,
+              pdf: citationData.details.pdf,
+              publication_number: citationData.details.publication_number,
+              country: citationData.details.country,
+              publication_date: citationData.details.publication_date,
+            },
+            matrix: parsed.matrix,
+            excerpts: parsed.excerpts,
+            descriptionWordCount: countWords(citationData.description),
+            descriptionLink: citationData.descriptionLink,
+            fromCitationEnhancement: true,
+            citationLevel: citationData.level,
+            metrics: {
+              considerable,
+              partial,
+              none: matrixRows.length - considerable - partial - 2
+            }
+          });
+        }
+      }
+    }
+    
+    // Step 7: Re-rank ALL patents with proper sequential ranking
+    if (finalComparisons.length > 0) {
+      console.log(`[Citation Enhancement][${jobId}] Re-ranking ${finalComparisons.length} patents`);
+      
+      // Extract matrices for re-ranking
+      const finalMatrices = finalComparisons.map(comp => comp.matrix || '').filter(Boolean);
+      const finalPatentIds = finalComparisons.map(comp => comp.patentId);
+      
+      if (finalMatrices.length > 0) {
+        const rankingPrompt = generatePrompt4(finalMatrices, finalPatentIds);
+        const rankingResponse = await runGeminiPrompt(rankingPrompt, true); // Flash for ranking
+        const newRankings = parsePrompt4Output(rankingResponse);
+        
+        // Update rankings
+        const rankingMap = new Map();
+        newRankings.forEach(ranking => {
+          rankingMap.set(ranking.patentId, ranking);
+        });
+        
+        finalComparisons.forEach(comp => {
+          if (rankingMap.has(comp.patentId)) {
+            const ranking = rankingMap.get(comp.patentId);
+            comp.rank = ranking.rank;
+            comp.foundSummary = ranking.foundSummary;
+            comp.metrics = ranking.metrics;
+          }
+        });
+        
+        // Sort by rank
+        finalComparisons.sort((a, b) => (a.rank || 999) - (b.rank || 999));
+      }
+      
+      // IMPORTANT: Ensure all patents have sequential ranks 1-10
+      finalComparisons.forEach((comp, index) => {
+        comp.rank = index + 1;
+      });
+    }
+    
+    // Add non-selected citations to additional results
+    allCitationDetails.forEach(citation => {
+      if (!final10Ids.includes(citation.patentId)) {
+        additionalCitations.push({
+          patent_id: citation.patentId,
+          title: citation.details.title || '',
+          assignee: citation.details.assignee || '',
+          snippet: citation.details.abstract || '',
+          filing_date: citation.details.filing_date || '',
+          inventor: citation.details.inventor || '',
+          patent_link: `https://patents.google.com/patent/${extractPatentNumber(citation.patentId)}`,
+          is_scholar: false,
+          citationLevel: citation.level,
+          fromCitationPool: true
+        });
+      }
+    });
+    
+    const enhancementEnd = performance.now();
+    console.log(
+      `[Citation Enhancement][${jobId}] Completed in ${((enhancementEnd - enhancementStart) / 1000).toFixed(2)}s`
+    );
+    console.log(
+      `[Citation Enhancement][${jobId}] Final: ${finalComparisons.length} matrices, ${additionalCitations.length} additional results`
+    );
+    
+    return {
+      enhancedComparisons: finalComparisons,
+      additionalCitations
+    };
+    
+  } catch (error) {
+    console.error(`[Citation Enhancement][${jobId}] Error:`, error);
+    return {
+      enhancedComparisons: comparisons,
+      additionalCitations: []
+    };
+  }
+}
+
 async function searchScholarResults(query, num = 2) {
   // Default to 2 results
   const startTime = performance.now();
@@ -1645,8 +2221,7 @@ async function searchScholarResults(query, num = 2) {
  * @returns {Promise<Object>} - The patent details object with a "fullDescription" and "descriptionLink" field.
  */
 
-// MODIFY: Update getPatentDetails with better HTML handling
-// MODIFY: Update getPatentDetails with better HTML handling and truncation
+// Update getPatentDetails to include citations
 async function getPatentDetails(patentId) {
   const startTime = performance.now();
   console.log(
@@ -1693,6 +2268,13 @@ async function getPatentDetails(patentId) {
       abstract = patentData.abstract || "";
       descriptionLink = patentData.description_link;
       claims = patentData.claims || "";
+
+      // ADD THIS: Extract citations
+      const citations = {
+        forward: patentData.patent_citations?.original || [],
+        backward: patentData.cited_by?.original || [],
+        family_id: patentData.family_id || null
+      };
 
       let assignees = [];
       if (patentData.assignees && Array.isArray(patentData.assignees)) {
@@ -1784,13 +2366,15 @@ async function getPatentDetails(patentId) {
         ).toFixed(2)}s`
       );
 
-      // Return enhanced response with claims
+      // Return enhanced response with claims AND citations
       return {
         ...patentData,
         fullDescription,
         descriptionLink,
         abstract,
         claims,
+        citations, // ADD THIS
+        family_id: patentData.family_id, // ADD THIS
         title: patentData.title || "N/A",
         assignees: assignees || "N/A",
         filing_date: patentData.filing_date || "N/A",
@@ -2223,6 +2807,9 @@ async function processInventionAsync(
     `[PERF_LOG][${jobId}] Starting invention analysis at ${new Date().toISOString()}`
   );
 
+  // Initialize search queries log
+  const searchQueriesLog = [];
+
   try {
     // Step 1: Get Key Features
     const step1Start = performance.now();
@@ -2307,6 +2894,23 @@ async function processInventionAsync(
     // Combine all queries
     const queries = [...queries1, ...queries2].filter((q) => q.trim() !== "");
 
+    // Log queries
+    queries1.forEach((query) => {
+      searchQueriesLog.push({
+        type: "Primary Search",
+        query: query,
+        step: "Initial Patent Search"
+      });
+    });
+
+    queries2.forEach((query) => {
+      searchQueriesLog.push({
+        type: "Expanded Search",
+        query: query,
+        step: "Initial Patent Search"
+      });
+    });
+
     console.log(
       `[Analyze Invention Log - Backend Step 2.1] Generated ${queries.length} SERP Queries (${queries1.length} from set 1, ${queries2.length} from set 2) for Job ${jobId}:`,
       JSON.stringify(queries, null, 2)
@@ -2382,6 +2986,77 @@ async function processInventionAsync(
       }
     });
 
+    // Step 3.2: Extract CPC codes and run additional queries with enhanced keywords
+    if (patentResultsOnly.length > 20) {
+      console.log(`[Analyze Invention Log - Backend Step 3.2] Extracting CPC codes for additional queries`);
+      const topCPCs = extractTopCPCCodes(patentResultsOnly, 2);
+      
+      if (topCPCs.length > 0) {
+        console.log(`[Analyze Invention Log - Backend Step 3.2] Top CPC codes found: ${topCPCs.join(', ')}`);
+        
+        // Extract key feature keywords from the key features
+        const featureKeywords = keyFeatures
+          .split(/[,.\n]/) // Split by common delimiters
+          .map(f => f.trim())
+          .filter(f => f.length > 3 && f.length < 30) // Get meaningful phrases
+          .slice(0, 5) // Top 5 feature phrases
+          .map(f => {
+            // Extract 1-2 key technical words from each feature
+            const words = f.split(' ').filter(w => w.length > 3);
+            return words.slice(0, 2).join(' OR ');
+          })
+          .filter(Boolean);
+        
+        // Create refined CPC queries with feature keywords
+        const cpcQueries = topCPCs.map(cpc => {
+          // Combine CPC with feature keywords
+          const featureClause = featureKeywords.length > 0 
+            ? `AND (${featureKeywords.join(' OR ')})`
+            : `AND (${queries[0] ? queries[0].split(' ').slice(0, 3).join(' OR ') : 'innovation'})`;
+          return `CPC:${cpc} ${featureClause}`;
+        });
+        
+        // Log CPC queries
+        cpcQueries.forEach(query => {
+          searchQueriesLog.push({
+            type: "Classification-Based Search",
+            query: query,
+            step: "CPC Refinement"
+          });
+        });
+
+        console.log(`[Analyze Invention Log - Backend Step 3.2] Enhanced CPC queries: ${cpcQueries.join(' | ')}`);
+        
+        // Run CPC queries in parallel
+        const cpcResults = await Promise.all(
+          cpcQueries.map(async (query) => {
+            console.log(`[Analyze Invention Log - Backend Step 3.2] Running enhanced CPC query: "${query}"`);
+            try {
+              const results = await searchPatents(query, 20);
+              return results;
+            } catch (error) {
+              console.error(`Error in CPC query "${query}":`, error.message);
+              return [];
+            }
+          })
+        );
+        
+        // Add CPC results to patent pool
+        const cpcPatents = cpcResults.flat();
+        console.log(`[Analyze Invention Log - Backend Step 3.2] Added ${cpcPatents.length} patents from enhanced CPC queries`);
+        
+        // Deduplicate again
+        cpcPatents.forEach((result) => {
+          if (result.patent_id && !patentMap.has(result.patent_id)) {
+            patentMap.set(result.patent_id, result);
+          }
+        });
+        
+        patentResultsOnly = Array.from(patentMap.values());
+        console.log(`[Analyze Invention Log - Backend Step 3.3] Total unique patents after enhanced CPC: ${patentResultsOnly.length}`);
+      }
+    }
+
     patentResultsOnly = Array.from(patentMap.values());
     console.log(
       `[Analyze Invention Log - Backend Step 3.3] Total unique PATENT results fetched: ${patentResultsOnly.length}`
@@ -2419,14 +3094,14 @@ async function processInventionAsync(
       ).toFixed(2)}s`
     );
 
-    // Step 4: Build consolidated text for Top 20 Selection
+    // Step 4: Build consolidated text for Top 30 Selection
     const step4Start = performance.now();
     console.log(
       `[PERF_LOG][${jobId}] Step 4 - Build Results Text: Starting at ${new Date().toISOString()}`
     );
     const resultsText = buildResultsText(patentResultsForSelection);
     console.log(
-      `[Analyze Invention Log - Backend Step 4] Built consolidated patent results text for Top 20 Selection (Job ${jobId})`
+      `[Analyze Invention Log - Backend Step 4] Built consolidated patent results text for Top 30 Selection (Job ${jobId})`
     );
     const step4End = performance.now();
     console.log(
@@ -2436,135 +3111,194 @@ async function processInventionAsync(
       ).toFixed(2)}s`
     );
 
-    // Replace the relevant sections in processInventionAsync with these updates:
+    // Step 4.5: Select Top 30 Patents with Temperature Sweep
+    const step4_5Start = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.5 - Select Top 30 with Temperature Sweep: Starting at ${new Date().toISOString()}`
+    );
+    job.progress = 50;
 
-// Step 4.5: Select Top 30 Patents (instead of Top 20)
-const step4_5Start = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.5 - Select Top 30: Starting at ${new Date().toISOString()}`
-);
-job.progress = 50;
-const promptTop30 = generatePrompt_Top30Selection(inventionText, resultsText);
-console.log(`[Analyze Invention] Running Top 30 Selection for Job ${jobId}.`);
-const geminiResponseTop30 = await runGeminiPrompt(promptTop30);
-const top30PatentIds = parseTop30Selection(geminiResponseTop30);
-console.log(`[Analyze Invention] Selected ${top30PatentIds.length} patents for detailed analysis`);
-const step4_5End = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.5 - Select Top 30: Completed in ${(
-    (step4_5End - step4_5Start) /
-    1000
-  ).toFixed(2)}s`
-);
+    // Create two model instances with different temperatures
+    const geminiModelLowTemp = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
+    });
 
-// Step 4.6: Fetch Details for Top 30 (parallel)
-const step4_6Start = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.6 - Fetch Top 30 Details: Starting at ${new Date().toISOString()}`
-);
-job.progress = 55;
-console.log(`[Analyze Invention] Fetching details for 30 patents...`);
+    const geminiModelHighTemp = genAI.getGenerativeModel({
+      model: "gemini-2.5-pro",
+    });
 
-const detailsPromises = top30PatentIds.map(async (patentId) => {
-  const details = await getPatentDetails(patentId);
-  return {
-    patentId,
-    details,
-    claims: details.claims || "",
-    description: details.fullDescription || "",
-    descriptionLink: details.descriptionLink || ""
-  };
-});
+    // Function to run Gemini with specific temperature
+    async function runGeminiWithTemp(prompt, temperature) {
+      const tempConfig = {
+        ...generationConfig,
+        temperature: temperature
+      };
+      
+      const chatSession = (temperature === 0.2 ? geminiModelLowTemp : geminiModelHighTemp).startChat({
+        generationConfig: tempConfig,
+        history: [],
+      });
+      
+      const result = await chatSession.sendMessage(prompt);
+      return result.response.text();
+    }
 
-const top30Details = await Promise.all(detailsPromises);
-console.log(`[Analyze Invention] Fetched details for ${top30Details.length} patents`);
-const step4_6End = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.6 - Fetch Top 30 Details: Completed in ${(
-    (step4_6End - step4_6Start) /
-    1000
-  ).toFixed(2)}s`
-);
+    const promptTop30 = generatePrompt_Top30Selection(inventionText, resultsText);
+    console.log(`[Analyze Invention] Running Top 30 Selection with temperature sweep for Job ${jobId}.`);
 
-// Step 4.7: Build partial descriptions text for final selection with 50K chars
-const step4_7Start = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.7 - Build Partial Descriptions (50K chars): Starting at ${new Date().toISOString()}`
-);
+    // Run both temperature selections in parallel
+    const [lowTempResponse, highTempResponse] = await Promise.all([
+      runGeminiWithTemp(promptTop30, 0.2),
+      runGeminiWithTemp(promptTop30, 0.8)
+    ]);
 
-const patentsWithPartialDescriptions = top30Details.map(p => {
-  // Extract first 50,000 characters from description
-  const partialDescription = (p.description || p.details.abstract || '').substring(0, 50000);
-  
-  return `Patent ID: ${p.patentId}
+    // Parse both responses
+    const lowTempPatents = parseTop30Selection(lowTempResponse);
+    const highTempPatents = parseTop30Selection(highTempResponse);
+
+    console.log(`[Analyze Invention] Low temp (0.2) selected ${lowTempPatents.length} patents`);
+    console.log(`[Analyze Invention] High temp (0.8) selected ${highTempPatents.length} patents`);
+
+    // Find consensus patents (intersection)
+    const consensusPatents = lowTempPatents.filter(patentId => 
+      highTempPatents.includes(patentId)
+    );
+
+    console.log(`[Analyze Invention] Consensus patents: ${consensusPatents.length}`);
+
+    // Create combined list: consensus first, then fill from both lists
+    const top30PatentIds = [...consensusPatents];
+    const remainingSlots = 30 - consensusPatents.length;
+
+    // Add remaining patents from both lists (avoiding duplicates)
+    const additionalCandidates = [
+      ...lowTempPatents.filter(p => !consensusPatents.includes(p)),
+      ...highTempPatents.filter(p => !consensusPatents.includes(p))
+    ];
+
+    // Remove duplicates from additional candidates
+    const uniqueAdditional = [...new Set(additionalCandidates)];
+
+    // Fill remaining slots
+    top30PatentIds.push(...uniqueAdditional.slice(0, remainingSlots));
+
+    console.log(`[Analyze Invention] Final Top 30 after temperature sweep: ${top30PatentIds.length} patents`);
+    const step4_5End = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.5 - Select Top 30 with Temperature Sweep: Completed in ${(
+        (step4_5End - step4_5Start) /
+        1000
+      ).toFixed(2)}s`
+    );
+
+    // Step 4.6: Fetch Details for Top 30 (parallel)
+    const step4_6Start = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.6 - Fetch Top 30 Details: Starting at ${new Date().toISOString()}`
+    );
+    job.progress = 55;
+    console.log(`[Analyze Invention] Fetching details for 30 patents...`);
+
+    const detailsPromises = top30PatentIds.map(async (patentId) => {
+      const details = await getPatentDetails(patentId);
+      return {
+        patentId,
+        details,
+        claims: details.claims || "",
+        description: details.fullDescription || "",
+        descriptionLink: details.descriptionLink || ""
+      };
+    });
+
+    const top30Details = await Promise.all(detailsPromises);
+    console.log(`[Analyze Invention] Fetched details for ${top30Details.length} patents`);
+    const step4_6End = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.6 - Fetch Top 30 Details: Completed in ${(
+        (step4_6End - step4_6Start) /
+        1000
+      ).toFixed(2)}s`
+    );
+
+    // Step 4.7: Build partial descriptions text for final selection with 50K chars
+    const step4_7Start = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.7 - Build Partial Descriptions (50K chars): Starting at ${new Date().toISOString()}`
+    );
+
+    const patentsWithPartialDescriptions = top30Details.map(p => {
+      // Extract first 50,000 characters from description
+      const partialDescription = (p.description || p.details.abstract || '').substring(0, 50000);
+      
+      return `Patent ID: ${p.patentId}
 Title: ${p.details.title || 'N/A'}
 Assignee: ${p.details.assignee || 'N/A'}
 Filing Date: ${p.details.filing_date || 'N/A'}
 Partial Description (50K chars): ${partialDescription}`;
-}).join('\n\n---\n\n');
+    }).join('\n\n---\n\n');
 
-const step4_7End = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 4.7 - Build Partial Descriptions: Completed in ${(
-    (step4_7End - step4_7Start) /
-    1000
-  ).toFixed(2)}s`
-);
+    const step4_7End = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 4.7 - Build Partial Descriptions: Completed in ${(
+        (step4_7End - step4_7Start) /
+        1000
+      ).toFixed(2)}s`
+    );
 
-// Step 5: Select Final 5 from partial descriptions
-const step5Start = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 5 - Select Final 5: Starting at ${new Date().toISOString()}`
-);
-job.progress = 65;
-const promptFinal5 = generatePrompt_Final5Selection(inventionText, patentsWithPartialDescriptions);
-console.log(`[Analyze Invention] Running Final 5 Selection from partial descriptions (50K chars each)...`);
-const geminiResponseFinal5 = await runGeminiPrompt(promptFinal5);
+    // Step 5: Select Final 5 from partial descriptions
+    const step5Start = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 5 - Select Final 5: Starting at ${new Date().toISOString()}`
+    );
+    job.progress = 60;
+    const promptFinal5 = generatePrompt_Final5Selection(inventionText, patentsWithPartialDescriptions);
+    console.log(`[Analyze Invention] Running Final 5 Selection from partial descriptions (50K chars each)...`);
+    const geminiResponseFinal5 = await runGeminiPrompt(promptFinal5);
 
-// Parse final 5 selections (same as before)
-const selectedPatentIdsRaw = [];
-const regex2 = /<h1>(.*?)<\/h1>/g;
-let match3;
-while ((match3 = regex2.exec(geminiResponseFinal5)) !== null) {
-  selectedPatentIdsRaw.push(match3[1].trim());
-}
-    
-const selectedPatentIds = selectedPatentIdsRaw
-  .map((id) => {
-    let normalizedId = id;
-    
-    // NEW CLEANING LOGIC: Remove ** wrapping if present
-    if (normalizedId.includes('**')) {
-      normalizedId = normalizedId.replace(/\*\*/g, '');
+    // Parse final 5 selections (same as before)
+    const selectedPatentIdsRaw = [];
+    const regex2 = /<h1>(.*?)<\/h1>/g;
+    let match3;
+    while ((match3 = regex2.exec(geminiResponseFinal5)) !== null) {
+      selectedPatentIdsRaw.push(match3[1].trim());
     }
     
-    // NEW CLEANING LOGIC: Remove duplicate patent/ prefixes
-    // This regex will match patterns like "patent/patent/" and reduce to single "patent/"
-    normalizedId = normalizedId.replace(/^(patent\/)+/g, 'patent/');
-    
-    // Existing normalization logic
-    if (!normalizedId.startsWith("patent/"))
-      normalizedId = "patent/" + normalizedId;
-    if (!normalizedId.endsWith("/en") && !/\/[a-z]{2}$/.test(normalizedId))
-      normalizedId = normalizedId + "/en";
-    return normalizedId;
-  })
-  .filter((id) => id !== "patent//en");
+    const selectedPatentIds = selectedPatentIdsRaw
+      .map((id) => {
+        let normalizedId = id;
+        
+        // NEW CLEANING LOGIC: Remove ** wrapping if present
+        if (normalizedId.includes('**')) {
+          normalizedId = normalizedId.replace(/\*\*/g, '');
+        }
+        
+        // NEW CLEANING LOGIC: Remove duplicate patent/ prefixes
+        // This regex will match patterns like "patent/patent/" and reduce to single "patent/"
+        normalizedId = normalizedId.replace(/^(patent\/)+/g, 'patent/');
+        
+        // Existing normalization logic
+        if (!normalizedId.startsWith("patent/"))
+          normalizedId = "patent/" + normalizedId;
+        if (!normalizedId.endsWith("/en") && !/\/[a-z]{2}$/.test(normalizedId))
+          normalizedId = normalizedId + "/en";
+        return normalizedId;
+      })
+      .filter((id) => id !== "patent//en");
 
-const uniqueSelectedPatentIds = [...new Set(selectedPatentIds)].slice(0, 5);
-console.log(
-  `[Analyze Invention Log - Backend Step 5] Selected Final Patent IDs for Job ${jobId}:`,
-  JSON.stringify(uniqueSelectedPatentIds, null, 2)
-);
-const step5End = performance.now();
-console.log(
-  `[PERF_LOG][${jobId}] Step 5 - Select Final 5: Completed in ${(
-    (step5End - step5Start) /
-    1000
-  ).toFixed(2)}s`
-);
+    const uniqueSelectedPatentIds = [...new Set(selectedPatentIds)].slice(0, 5);
+    console.log(
+      `[Analyze Invention Log - Backend Step 5] Selected Final Patent IDs for Job ${jobId}:`,
+      JSON.stringify(uniqueSelectedPatentIds, null, 2)
+    );
+    const step5End = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 5 - Select Final 5: Completed in ${(
+        (step5End - step5Start) /
+        1000
+      ).toFixed(2)}s`
+    );
 
-// Step 6: Process Selected Patents (using stored details)
+    // Step 6: Process Selected Patents (using stored details)
     const step6Start = performance.now();
     console.log(
       `[PERF_LOG][${jobId}] Step 6 - Process Selected Patents: Starting at ${new Date().toISOString()}`
@@ -2586,20 +3320,20 @@ console.log(
           `[Analyze Invention Log - Backend Step 6.0] Processing Patent ID: ${patentId} (Job ${jobId})`
         );
         try {
-          // Find stored details from top20Details
-          const storedPatentData = top30Details.find(d => d.patentId === patentId);
+          // Find stored details from top30Details
+          let storedPatentData = top30Details.find(d => d.patentId === patentId);
 
-if (!storedPatentData) {
-  // If not in top30Details (shouldn't happen), fetch it
-  console.warn(`Patent ${patentId} not found in top30Details, fetching...`);
-  const details = await getPatentDetails(patentId);
-  storedPatentData = {
-    patentId,
-    details,
-    description: details.fullDescription || "",
-    descriptionLink: details.descriptionLink || ""
-  };
-}
+          if (!storedPatentData) {
+            // If not in top30Details (shouldn't happen), fetch it
+            console.warn(`Patent ${patentId} not found in top30Details, fetching...`);
+            const details = await getPatentDetails(patentId);
+            storedPatentData = {
+              patentId,
+              details,
+              description: details.fullDescription || "",
+              descriptionLink: details.descriptionLink || ""
+            };
+          }
 
           // Find matching patent in original SERP results for bibliographic data
           const matchingPatent = patentResultsForSelection.find(
@@ -2723,7 +3457,7 @@ if (!storedPatentData) {
       }
     );
 
-    const comparisons = await Promise.all(comparisonPromises);
+    let comparisons = await Promise.all(comparisonPromises);
     console.log(
       `[Analyze Invention Log - Backend Step 6.8] Completed parallel processing for all selected patents (Job ${jobId}).`
     );
@@ -2814,6 +3548,102 @@ if (!storedPatentData) {
       ).toFixed(2)}s`
     );
 
+    // Step 7.5: Citation Enhancement (Always runs)
+    const step7_5Start = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 7.5 - Citation Enhancement: Starting at ${new Date().toISOString()}`
+    );
+    job.progress = 75;
+
+    // Run citation enhancement
+    const citationEnhancementResult = await processCitationEnhancement(
+      comparisons,
+      keyFeatures,
+      inventionText,
+      top30Details,
+      allResults,
+      jobId,
+      searchQueriesLog
+    );
+    
+    // After first-level screening
+    job.progress = 78;
+    
+    // After fetching first-level details
+    job.progress = 82;
+    
+    // After screening second-level citations
+    job.progress = 86;
+    
+    // After fetching second-level details
+    job.progress = 88;
+    
+    // After final selection of 10
+    job.progress = 92;
+
+    // Update comparisons with enhanced results (now includes ALL patents with matrices)
+    let enhancedComparisons = citationEnhancementResult.enhancedComparisons;
+    const additionalCitations = citationEnhancementResult.additionalCitations;
+
+    // Step 7.6: Re-rank ALL patents (including new ones)
+    if (enhancedComparisons.length > comparisons.length) {
+      console.log(`[PERF_LOG][${jobId}] Re-ranking ${enhancedComparisons.length} patents after citation enhancement`);
+      
+      // Extract matrices for re-ranking
+      const enhancedMatrices = enhancedComparisons.map(comp => comp.matrix || '').filter(Boolean);
+      const enhancedPatentIds = enhancedComparisons.map(comp => comp.patentId);
+      
+      if (enhancedMatrices.length > 0) {
+        const rankingPrompt = generatePrompt4(enhancedMatrices, enhancedPatentIds);
+        const rankingResponse = await runGeminiPrompt(rankingPrompt, true); // Flash for ranking
+        const newRankings = parsePrompt4Output(rankingResponse);
+        
+        // Update rankings
+        const rankingMap = new Map();
+        newRankings.forEach(ranking => {
+          rankingMap.set(ranking.patentId, ranking);
+        });
+        
+        enhancedComparisons.forEach(comp => {
+          if (rankingMap.has(comp.patentId)) {
+            const ranking = rankingMap.get(comp.patentId);
+            comp.rank = ranking.rank;
+            comp.foundSummary = ranking.foundSummary;
+            comp.metrics = ranking.metrics;
+          }
+        });
+        
+        // Sort by new rank
+        enhancedComparisons.sort((a, b) => (a.rank || 999) - (b.rank || 999));
+      }
+    }
+    
+    // After generating new matrices
+    job.progress = 95;
+
+    // Add additional citations to the allResults array (avoiding duplicates)
+    const existingPatentIds = new Set(allResults.map(r => r.patent_id));
+    const uniqueAdditionalCitations = additionalCitations.filter(
+      citation => !existingPatentIds.has(citation.patent_id)
+    );
+
+    // Add unique citations to allResults
+    allResults.push(...uniqueAdditionalCitations);
+
+    // Update comparisons
+    comparisons = enhancedComparisons;
+
+    const step7_5End = performance.now();
+    console.log(
+      `[PERF_LOG][${jobId}] Step 7.5 - Citation Enhancement: Completed in ${(
+        (step7_5End - step7_5Start) /
+        1000
+      ).toFixed(2)}s`
+    );
+    console.log(
+      `[PERF_LOG][${jobId}] Final patent count with matrices: ${comparisons.length}`
+    );
+
     // Step 8: Assemble Final Result
     job.progress = 95;
     const finalResult = {
@@ -2822,12 +3652,21 @@ if (!storedPatentData) {
       patentResults: allResults,
       selectedPatentIds: uniqueSelectedPatentIds,
       comparisons,
+      searchQueries: searchQueriesLog // Add this
     };
 
     // Store the final result and mark job as completed
     job.progress = 100;
     job.status = "completed";
     job.result = finalResult;
+
+    // Cleanup timeout
+    setTimeout(() => {
+      if (jobQueue.has(jobId)) {
+        jobQueue.delete(jobId);
+        console.log(`Job ${jobId} removed from queue after timeout`);
+      }
+    }, 3600000);
 
     const endTime = performance.now();
     const totalTime = (endTime - startTime) / 1000; // Convert to seconds
@@ -2862,13 +3701,13 @@ if (!storedPatentData) {
       ).toFixed(2)}s`
     );
     console.log(
-      `[PERF_LOG][${jobId}] Step 4.5 (Select Top 20): ${(
+      `[PERF_LOG][${jobId}] Step 4.5 (Select Top 30 with Temperature Sweep): ${(
         (step4_5End - step4_5Start) /
         1000
       ).toFixed(2)}s`
     );
     console.log(
-      `[PERF_LOG][${jobId}] Step 4.6 (Fetch Top 20 Details): ${(
+      `[PERF_LOG][${jobId}] Step 4.6 (Fetch Top 30 Details): ${(
         (step4_6End - step4_6Start) /
         1000
       ).toFixed(2)}s`
@@ -2891,15 +3730,14 @@ if (!storedPatentData) {
         1000
       ).toFixed(2)}s`
     );
+    console.log(
+      `[PERF_LOG][${jobId}] Step 7.5 (Citation Enhancement): ${(
+        (step7_5End - step7_5Start) /
+        1000
+      ).toFixed(2)}s`
+    );
     console.log(`[PERF_LOG][${jobId}] ==== END TIMING SUMMARY ====`);
 
-    // Cleanup timeout
-    setTimeout(() => {
-      if (jobQueue.has(jobId)) {
-        jobQueue.delete(jobId);
-        console.log(`Job ${jobId} removed from queue after timeout`);
-      }
-    }, 3600000);
   } catch (error) {
     console.error(`Error processing job ${jobId}:`, error);
     job.status = "failed";
