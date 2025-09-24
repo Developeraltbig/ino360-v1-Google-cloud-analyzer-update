@@ -1616,7 +1616,7 @@ async function generateanswerInno2(e) {
     }
   }
 
-  useEffect(() => {
+useEffect(() => {
   const fetchInnoCheckData = async () => {
     try {
       const userData = localStorage.getItem("user");
@@ -1645,6 +1645,10 @@ async function generateanswerInno2(e) {
       console.log("Fetched project_id:", projectResponse.data.project_id);
       setProjectData(projectResponse.data);
 
+      // Get current selectedButtons from localStorage
+      const currentSelectedButtons = localStorage.getItem("selectedButtons");
+      const currentSelected = currentSelectedButtons ? JSON.parse(currentSelectedButtons) : [];
+
       // Fetch InnoCheck data and determine existence
       try {
         const innocheckResponse = await axios.get("/api/getInnocheck", {
@@ -1656,11 +1660,13 @@ async function generateanswerInno2(e) {
           setDraftData(existingInnocheck);
           setInnoCheckExists(true); // InnoCheck data exists
 
-          // IMPORTANT: Set selectedButtons from saved InnoCheck data
-          if (existingInnocheck.selected_buttons && Array.isArray(existingInnocheck.selected_buttons)) {
+          // MODIFIED: Only use database selected_buttons if no current selection exists
+          if (currentSelected.length === 0 && existingInnocheck.selected_buttons && Array.isArray(existingInnocheck.selected_buttons)) {
             setSelectedButtons(existingInnocheck.selected_buttons);
-            // Also update localStorage to keep it in sync
             localStorage.setItem("selectedButtons", JSON.stringify(existingInnocheck.selected_buttons));
+          } else if (currentSelected.length > 0) {
+            // Use current selection from localStorage
+            setSelectedButtons(currentSelected);
           }
 
           // Populate form with existing data
@@ -1692,6 +1698,10 @@ async function generateanswerInno2(e) {
           }
         } else {
           setInnoCheckExists(false); // No InnoCheck data
+          // Keep current selectedButtons from localStorage
+          if (currentSelected.length > 0) {
+            setSelectedButtons(currentSelected);
+          }
         }
       } catch (innocheckError) {
         if (
@@ -1703,6 +1713,10 @@ async function generateanswerInno2(e) {
         } else {
           console.warn("Error fetching InnoCheck data:", innocheckError);
           setInnoCheckExists(false); // Default to false on other errors
+        }
+        // Keep current selectedButtons from localStorage
+        if (currentSelected.length > 0) {
+          setSelectedButtons(currentSelected);
         }
       }
     } catch (error) {
