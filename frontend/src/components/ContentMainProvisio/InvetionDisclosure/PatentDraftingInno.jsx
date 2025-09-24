@@ -501,90 +501,92 @@ const PatentDraftingInno = () => {
     
     const combinedResults = [...scholarResults, ...additionalPatents];
     
-    html += `
-      <div style="background-color: #f8f9fa; border-left: 5px solid #2196f3; padding: 10px 15px; margin: 30px 0 20px 0;">
-        <h3 style="color: #2196f3; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Additional Search Results (${combinedResults.length})</h3>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
-    `;
-
-    let scholarCounter = 0;
-    combinedResults.forEach((result) => {
-      const isScholar = result.is_scholar;
-      if (isScholar) scholarCounter++;
-      
-      const simplifiedId = isScholar
-        ? `Scholar Res ${scholarCounter}`
-        : extractPatentNumber(result.patent_id);
-      const link = isScholar
-        ? result.scholar_link || "#"
-        : `https://patents.google.com/patent/${extractPatentNumber(result.patent_id)}`;
-
+    if (combinedResults.length > 0) {
       html += `
-        <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-          <!-- Result Header -->
-          <div style="background-color: ${isScholar ? '#f0f4c3' : '#f5f7f9'}; padding: 12px; border-bottom: 1px solid #ddd;">
-            <strong style="font-size: 13px;">${
-              isScholar ? "Scholar Result: " : "Search Result ID: "
-            }</strong>
-            <a href="${link}" target="_blank" style="color: #2196f3; text-decoration: none; font-weight: 500;">
-              ${simplifiedId}
-            </a>
-          </div>
-          
-          <!-- Result Content -->
-          <div style="padding: 12px;">
-            <h5 style="margin: 0 0 8px 0; color: #333; font-size: 13px;">Title</h5>
-            <p style="margin: 0 0 12px; font-size: 12px; color: #444; line-height: 1.4;">
-              ${result.title || "No title available"}
-            </p>
+        <div style="background-color: #f8f9fa; border-left: 5px solid #2196f3; padding: 10px 15px; margin: 30px 0 20px 0;">
+          <h3 style="color: #2196f3; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Additional Search Results (${combinedResults.length})</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+      `;
+
+      let scholarCounter = 0;
+      combinedResults.forEach((result) => {
+        const isScholar = result.is_scholar;
+        if (isScholar) scholarCounter++;
+        
+        const simplifiedId = isScholar
+          ? `Scholar Res ${scholarCounter}`
+          : extractPatentNumber(result.patent_id);
+        const link = isScholar
+          ? result.scholar_link || "#"
+          : `https://patents.google.com/patent/${extractPatentNumber(result.patent_id)}`;
+
+        html += `
+          <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <!-- Result Header -->
+            <div style="background-color: ${isScholar ? '#f0f4c3' : '#f5f7f9'}; padding: 12px; border-bottom: 1px solid #ddd;">
+              <strong style="font-size: 13px;">${
+                isScholar ? "Scholar Result: " : "Search Result ID: "
+              }</strong>
+              <a href="${link}" target="_blank" style="color: #2196f3; text-decoration: none; font-weight: 500;">
+                ${simplifiedId}
+              </a>
+            </div>
             
-            ${
-              result.snippet
-                ? `
-              <div style="margin-bottom: 12px; font-size: 11px; color: #666; background-color: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 2px solid #ddd;">
-                ${result.snippet}
-              </div>`
-                : ""
-            }
-            
-            <!-- Meta Information -->
-            <div style="font-size: 11px; color: #777;">
+            <!-- Result Content -->
+            <div style="padding: 12px;">
+              <h5 style="margin: 0 0 8px 0; color: #333; font-size: 13px;">Title</h5>
+              <p style="margin: 0 0 12px; font-size: 12px; color: #444; line-height: 1.4;">
+                ${result.title || "No title available"}
+              </p>
+              
               ${
-                isScholar && result.publication_date
-                  ? `<div><strong>Publication Date:</strong> ${result.publication_date}</div>`
+                result.snippet
+                  ? `
+                <div style="margin-bottom: 12px; font-size: 11px; color: #666; background-color: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 2px solid #ddd;">
+                  ${result.snippet}
+                </div>`
                   : ""
               }
-              ${
-                !isScholar && result.filing_date
-                  ? `<div><strong>Filing Date:</strong> ${result.filing_date}</div>`
-                  : ""
-              }
-              ${
-                isScholar && result.author
-                  ? `<div><strong>Author:</strong> ${result.author}</div>`
-                  : ""
-              }
-              ${
-                !isScholar && result.assignee
-                  ? `<div><strong>Assignee:</strong> ${result.assignee}</div>`
-                  : ""
-              }
-              ${
-                !isScholar && result.inventor
-                  ? `<div><strong>Inventor:</strong> ${result.inventor}</div>`
-                  : ""
-              }
+              
+              <!-- Meta Information -->
+              <div style="font-size: 11px; color: #777;">
+                ${
+                  isScholar && result.publication_date
+                    ? `<div><strong>Publication Date:</strong> ${result.publication_date}</div>`
+                    : ""
+                }
+                ${
+                  !isScholar && result.filing_date
+                    ? `<div><strong>Filing Date:</strong> ${result.filing_date}</div>`
+                    : ""
+                }
+                ${
+                  isScholar && result.author
+                    ? `<div><strong>Author:</strong> ${result.author}</div>`
+                    : ""
+                }
+                ${
+                  !isScholar && result.assignee
+                    ? `<div><strong>Assignee:</strong> ${result.assignee}</div>`
+                    : ""
+                }
+                ${
+                  !isScholar && result.inventor
+                    ? `<div><strong>Inventor:</strong> ${result.inventor}</div>`
+                    : ""
+                }
+              </div>
             </div>
           </div>
-        </div>
-      `;
-    });
-    
-    html += `</div>`;
+        `;
+      });
+      
+      html += `</div>`;
+    }
   }
 
-  // Search Strategy Section - NEW ADDITION
+  // Search Strategy Section
   if (analyzeData.searchQueries && Array.isArray(analyzeData.searchQueries)) {
     html += `
       <div style="background-color: #f8f9fa; border-left: 5px solid #ff9800; padding: 10px 15px; margin: 30px 0 20px 0;">
@@ -644,6 +646,109 @@ const PatentDraftingInno = () => {
     `;
   }
 
+  // Results Summary Section - ADDED
+  html += `
+    <div style="background-color: #f8f9fa; border-left: 5px solid #6c757d; padding: 10px 15px; margin: 30px 0 20px 0;">
+      <h3 style="color: #6c757d; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Results Summary</h3>
+    </div>
+    <h5 style="color: #666; margin: 0 0 15px 0; font-size: 14px;">
+      Consolidated list of all the analyzed patents and NPLs
+    </h5>
+  `;
+
+  if (analyzeData.patentResults && analyzeData.comparisons) {
+    // Get all unique results
+    const relevantPatentIds = analyzeData.comparisons.map(c => c.patentId);
+    const relevantResults = relevantPatentIds
+      .map((patentId) =>
+        analyzeData.patentResults.find(
+          (res) => res.patent_id === patentId
+        )
+      )
+      .filter(Boolean);
+
+    const scholarResults = analyzeData.patentResults
+      .filter((result) => result.is_scholar)
+      .slice(0, 2);
+      
+    const additionalPatents = analyzeData.patentResults
+      .filter((result) => {
+        if (result.is_scholar) return false;
+        const resultPatentNumber = extractPatentNumber(result.patent_id);
+        const shownPatentNumbers = relevantPatentIds.map(extractPatentNumber);
+        return !shownPatentNumbers.includes(resultPatentNumber);
+      })
+      .slice(0, 18);
+
+    const additionalResults = [...scholarResults, ...additionalPatents];
+    const combinedMap = new Map();
+    relevantResults.forEach((res) =>
+      combinedMap.set(res.patent_id || res.scholar_id, res)
+    );
+    additionalResults.forEach((res) =>
+      combinedMap.set(res.patent_id || res.scholar_id, res)
+    );
+    const displayedResults = Array.from(combinedMap.values());
+
+    if (displayedResults.length > 0) {
+      const itemsPerRow = 3;
+      const numRows = Math.ceil(displayedResults.length / itemsPerRow);
+      let scholarResultCounter = 0;
+
+      html += `
+        <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+          <tbody>
+      `;
+
+      for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+        html += `<tr>`;
+        for (let colIndex = 0; colIndex < itemsPerRow; colIndex++) {
+          const resultIndex = rowIndex * itemsPerRow + colIndex;
+          if (resultIndex < displayedResults.length) {
+            const result = displayedResults[resultIndex];
+            const isScholar = result.is_scholar;
+            
+            let displayText;
+            if (isScholar) {
+              scholarResultCounter++;
+              displayText = `Scholar Res ${scholarResultCounter}`;
+            } else {
+              displayText = extractPatentNumber(result.patent_id || "");
+            }
+
+            const link = isScholar
+              ? result.scholar_link || "#"
+              : result.patent_id
+              ? `https://patents.google.com/${result.patent_id}`
+              : "#";
+
+            html += `
+              <td style="border: 1px solid #ddd; padding: 10px;">
+                ${link !== "#" ? `
+                  <a href="${link}" target="_blank" style="color: #2196f3; text-decoration: none;">
+                    ${displayText}
+                  </a>
+                ` : displayText}
+              </td>
+            `;
+          } else {
+            html += `<td style="border: 1px solid #ddd; padding: 10px;"></td>`;
+          }
+        }
+        html += `</tr>`;
+      }
+
+      html += `
+          </tbody>
+        </table>
+      `;
+    } else {
+      html += `<p>No patent results available to summarize.</p>`;
+    }
+  } else {
+    html += `<p>No patent results available to summarize.</p>`;
+  }
+
   return html;
 };
 
@@ -670,28 +775,27 @@ const PatentDraftingInno = () => {
 
   const analyzeHTML = generateAnalyzeInventionHTML(analyzeData);
   
-  // Simplified and direct logic to fetch the project title
-  let projectTitle = "Untitled Project"; // Default value
-  try {
-    const projectId =
-      localStorage.getItem("project_id") ||
-      localStorage.getItem("selectedProject");
+let projectTitle = "Untitled Project"; // Default value
+try {
+  const projectId =
+    localStorage.getItem("project_id") ||
+    localStorage.getItem("selectedProject");
 
-    if (projectId) {
-      // Call the existing endpoint to get project data
-      const response = await axios.get("/getProjectData", {
+  if (projectId) {
+    // First try to get from the existing project data response
+    const response = await axios.get("/getProjectData", {
       params: { project_id: projectId },
     });
-      
-      // If the API call is successful and a title exists, use it
-      if (response.data && response.data.project_title) {
-        projectTitle = response.data.project_title;
-        console.log(`[handlePrintPdf] Successfully fetched project title from Invention model: ${projectTitle}`);
-      }
+    
+    // The project_title is stored in the Invention model
+    if (response.data && response.data.project_title) {
+      projectTitle = response.data.project_title;
+      console.log(`[handlePrintPdf/handleDownloadDocx] Successfully fetched project title: ${projectTitle}`);
     }
-  } catch (error) {
-    console.error("[handlePrintPdf] Error fetching project title from Invention model. Using default.", error);
   }
+} catch (error) {
+  console.error("[handlePrintPdf/handleDownloadDocx] Error fetching project title. Using default.", error);
+}
 
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
@@ -1100,27 +1204,28 @@ const PatentDraftingInno = () => {
     });
     
     // Simplified and direct logic to fetch the project title, same as in handlePrintPdf
-    let projectTitle = "Untitled Project"; // Default value
-    try {
-      const projectId =
-        localStorage.getItem("project_id") ||
-        localStorage.getItem("selectedProject");
+    // Updated Project Title Fetching (use this exact code in both handlePrintPdf and handleDownloadDocx)
+let projectTitle = "Untitled Project"; // Default value
+try {
+  const projectId =
+    localStorage.getItem("project_id") ||
+    localStorage.getItem("selectedProject");
 
-      if (projectId) {
-        // Call the existing endpoint to get project data
-        const response = await axios.get("/getProjectData", {
-        params: { project_id: projectId },
-      });
-        
-        // If the API call is successful and a title exists, use it
-        if (response.data && response.data.project_title) {
-          projectTitle = response.data.project_title;
-          console.log(`[handleDownloadDocx] Successfully fetched project title from Invention model: ${projectTitle}`);
-        }
-      }
-    } catch (error) {
-      console.error("[handleDownloadDocx] Error fetching project title from Invention model. Using default.", error);
+  if (projectId) {
+    // First try to get from the existing project data response
+    const response = await axios.get("/getProjectData", {
+      params: { project_id: projectId },
+    });
+    
+    // The project_title is stored in the Invention model
+    if (response.data && response.data.project_title) {
+      projectTitle = response.data.project_title;
+      console.log(`[handlePrintPdf/handleDownloadDocx] Successfully fetched project title: ${projectTitle}`);
     }
+  }
+} catch (error) {
+  console.error("[handlePrintPdf/handleDownloadDocx] Error fetching project title. Using default.", error);
+}
     
     // Create an enhanced cover page with better design
     const coverPage = [
@@ -1879,6 +1984,140 @@ const PatentDraftingInno = () => {
         );
       }
     }
+
+    // Results Summary Section - ADD THIS
+if (analyzeData.patentResults && analyzeData.comparisons) {
+  // Add page break before Results Summary
+  paragraphs.push(
+    new Paragraph({
+      children: [],
+      pageBreakBefore: true,
+    })
+  );
+  
+  paragraphs.push(createSubHeader("Results Summary"));
+  paragraphs.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: "Consolidated list of all the analyzed patents and NPLs",
+          size: 24,
+          color: "666666",
+        }),
+      ],
+      spacing: { after: 200 },
+    })
+  );
+
+  // Get all unique results
+  const relevantPatentIds = analyzeData.comparisons.map(c => c.patentId);
+  const relevantResults = relevantPatentIds
+    .map((patentId) =>
+      analyzeData.patentResults.find(
+        (res) => res.patent_id === patentId
+      )
+    )
+    .filter(Boolean);
+
+  const scholarResults = analyzeData.patentResults
+    .filter((result) => result.is_scholar)
+    .slice(0, 2);
+    
+  const additionalPatents = analyzeData.patentResults
+    .filter((result) => {
+      if (result.is_scholar) return false;
+      const resultPatentNumber = extractPatentNumber(result.patent_id);
+      const shownPatentNumbers = relevantPatentIds.map(extractPatentNumber);
+      return !shownPatentNumbers.includes(resultPatentNumber);
+    })
+    .slice(0, 18);
+
+  const additionalResults = [...scholarResults, ...additionalPatents];
+  const combinedMap = new Map();
+  relevantResults.forEach((res) =>
+    combinedMap.set(res.patent_id || res.scholar_id, res)
+  );
+  additionalResults.forEach((res) =>
+    combinedMap.set(res.patent_id || res.scholar_id, res)
+  );
+  const displayedResults = Array.from(combinedMap.values());
+
+  if (displayedResults.length > 0) {
+    const itemsPerRow = 3;
+    const numRows = Math.ceil(displayedResults.length / itemsPerRow);
+    let scholarResultCounter = 0;
+
+    const tableRows = [];
+    
+    for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+      const cells = [];
+      for (let colIndex = 0; colIndex < itemsPerRow; colIndex++) {
+        const resultIndex = rowIndex * itemsPerRow + colIndex;
+        if (resultIndex < displayedResults.length) {
+          const result = displayedResults[resultIndex];
+          const isScholar = result.is_scholar;
+          
+          let displayText;
+          if (isScholar) {
+            scholarResultCounter++;
+            displayText = `Scholar Res ${scholarResultCounter}`;
+          } else {
+            displayText = extractPatentNumber(result.patent_id || "");
+          }
+
+          cells.push(
+            new TableCell({
+              children: [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: displayText,
+                      size: 24,
+                      color: "2196f3",
+                    }),
+                  ],
+                }),
+              ],
+            })
+          );
+        } else {
+          cells.push(
+            new TableCell({
+              children: [new Paragraph({ text: "" })],
+            })
+          );
+        }
+      }
+      tableRows.push(new TableRow({ children: cells }));
+    }
+
+    paragraphs.push(
+      new Table({
+        rows: tableRows,
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        borders: {
+          top: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+          bottom: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+          left: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+          right: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+          insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+          insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "DDDDDD" },
+        },
+      })
+    );
+  } else {
+    paragraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: "No patent results available to summarize.",
+            size: 24,
+          }),
+        ],
+      })
+    );
+  }
+}
 
     // Create the document with headers and footers for page numbers
     const doc = new Document({
