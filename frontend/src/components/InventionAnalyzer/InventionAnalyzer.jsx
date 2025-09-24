@@ -792,40 +792,69 @@ if (statusData.progress <= 10) {
             </div>
           </div>
           <div className="analyzer-section">
-            <h3 className="analyzer-heading">Additional Search Results</h3>
-            <div className="patent-results-grid">
-              {(() => {
-                // First, separate scholar results and patent results
-                const scholarResults = resultData.patentResults
-                  .filter((result) => result.is_scholar)
-                  .slice(0, 2); // Get up to 2 scholar results
+  <h3 className="analyzer-heading">
+    Additional Search Results 
+    {(() => {
+      const scholarResults = resultData.patentResults
+        .filter(r => r.is_scholar)
+        .slice(0, 2);
+      
+      const additionalPatents = resultData.patentResults
+        .filter(r => {
+          if (r.is_scholar) return false;
+          const resultPatentNumber = extractPatentNumber(r.patent_id);
+          const shownPatentNumbers = resultData.comparisons.map(c => 
+            extractPatentNumber(c.patentId)
+          );
+          return !shownPatentNumbers.includes(resultPatentNumber);
+        })
+        .slice(0, 18); // Get up to 18 patents
+      
+      const total = scholarResults.length + additionalPatents.length;
+      return total > 0 ? ` (${total})` : '';
+    })()}
+  </h3>
+  <div className="patent-results-grid">
+    {(() => {
+      // Get 2 scholar results
+      const scholarResults = resultData.patentResults
+        .filter((result) => result.is_scholar)
+        .slice(0, 2);
 
-                // Get patents not in "Relevant Search Results"
-                const otherPatents = resultData.patentResults
-                  .filter((result) => {
-                    // Skip scholar results
-                    if (result.is_scholar) return false;
+      // Get patents not in Relevant Search Results
+      // Prioritize patents from citation pool (they have fromCitationPool flag)
+      const additionalPatents = resultData.patentResults
+        .filter((result) => {
+          if (result.is_scholar) return false;
+          
+          const resultPatentNumber = extractPatentNumber(result.patent_id);
+          const shownPatentNumbers = resultData.comparisons.map(c => 
+            extractPatentNumber(c.patentId)
+          );
+          
+          return !shownPatentNumbers.includes(resultPatentNumber);
+        })
+        .sort((a, b) => {
+          // Prioritize citation pool patents
+          if (a.fromCitationPool && !b.fromCitationPool) return -1;
+          if (!a.fromCitationPool && b.fromCitationPool) return 1;
+          // Then by citation level (1 before 2)
+          if (a.citationLevel && b.citationLevel) {
+            return a.citationLevel - b.citationLevel;
+          }
+          return 0;
+        })
+        .slice(0, 18); // Limit to 18 patents
 
-                    // Skip patents already in Relevant Search Results
-                    const resultPatentNumber = extractPatentNumber(
-                      result.patent_id
-                    );
+      // Combine: 2 scholars + up to 18 patents = max 20 total
+      const combinedResults = [...scholarResults, ...additionalPatents];
 
-                    const selectedPatentNumbers =
-                      resultData.selectedPatentIds.map(extractPatentNumber);
-                    return !selectedPatentNumbers.includes(resultPatentNumber);
-                  })
-                  .slice(0, 8); // Limit to 8 patent results
-
-                // Combine the results, showing scholar results first
-                const combinedResults = [...scholarResults, ...otherPatents];
-
-                return combinedResults.map((result, index) => (
-                  <PatentResultCard key={index} result={result} />
-                ));
-              })()}
-            </div>
-          </div>
+      return combinedResults.map((result, index) => (
+        <PatentResultCard key={index} result={result} />
+      ));
+    })()}
+  </div>
+</div>
 
 {resultData && resultData.searchQueries && resultData.searchQueries.length > 0 && (
   <div className="analyzer-section">
@@ -926,169 +955,132 @@ if (statusData.progress <= 10) {
 )}
 
           <div className="analyzer-section">
-            <h3 className="analyzer-heading">Results Summary</h3>
-            <h5 className="patent-title-heading">
-              Consolidated list of all the analyzed patents and NPLs
-            </h5>
-            <div className="analysis-section-content">
-              {resultData &&
-              resultData.patentResults &&
-              resultData.comparisons ? (
-                (() => {
-                  // 1. Get the list of relevant patent IDs (normalize if needed)
-                  const relevantPatentIds = (
-                    resultData.selectedPatentIds || []
-                  ).map((id) => (typeof id === "string" ? id : id.patent_id));
+  <h3 className="analyzer-heading">Results Summary</h3>
+  <h5 className="patent-title-heading">
+    Consolidated list of all the analyzed patents and NPLs
+  </h5>
+  <div className="analysis-section-content">
+    {resultData &&
+    resultData.patentResults &&
+    resultData.comparisons ? (
+      (() => {
+        // 1. Get the patents shown in Relevant Search Results (from comparisons)
+        const relevantPatentIds = resultData.comparisons.map(c => c.patentId);
+        
+        // 2. Get the full result objects for the relevant patents
+        const relevantResults = relevantPatentIds
+          .map((patentId) =>
+            resultData.patentResults.find(
+              (res) => res.patent_id === patentId
+            )
+          )
+          .filter(Boolean);
 
-                  // 2. Get the full result objects for the relevant patents
-                  const relevantResults = relevantPatentIds
-                    .map((relId) =>
-                      resultData.patentResults.find(
-                        (res) => res.patent_id === relId
-                      )
-                    )
-                    .filter(Boolean); // Filter out any potential undefined if IDs don't match
+        // 3. Get the additional results (same logic as Additional Search Results section)
+        const scholarResults = resultData.patentResults
+          .filter((result) => result.is_scholar)
+          .slice(0, 2);
+          
+        const additionalPatents = resultData.patentResults
+          .filter((result) => {
+            if (result.is_scholar) return false;
+            const resultPatentNumber = extractPatentNumber(result.patent_id);
+            const shownPatentNumbers = relevantPatentIds.map(extractPatentNumber);
+            return !shownPatentNumbers.includes(resultPatentNumber);
+          })
+          .sort((a, b) => {
+            if (a.fromCitationPool && !b.fromCitationPool) return -1;
+            if (!a.fromCitationPool && b.fromCitationPool) return 1;
+            if (a.citationLevel && b.citationLevel) {
+              return a.citationLevel - b.citationLevel;
+            }
+            return 0;
+          })
+          .slice(0, 18);
 
-                  // 3. Get the additional results (using the same logic as the "Additional Search Results" section)
-                  const additionalResults = resultData.patentResults
-                    .filter((result) => {
-                      if (result.is_scholar) return true; // Keep scholar results for this list initially
-                      // Check if it's NOT among the relevant ones
-                      const resultPatentNumber = extractPatentNumber(
-                        result.patent_id
-                      );
-                      const selectedPatentNumbers =
-                        relevantPatentIds.map(extractPatentNumber);
-                      return !selectedPatentNumbers.includes(
-                        resultPatentNumber
-                      );
-                    })
-                    // Now filter and limit as done in the display section
-                    .reduce(
-                      (acc, result) => {
-                        if (result.is_scholar && acc.scholarCount < 2) {
-                          acc.results.push(result);
-                          acc.scholarCount++;
-                        } else if (!result.is_scholar && acc.patentCount < 8) {
-                          acc.results.push(result);
-                          acc.patentCount++;
-                        }
-                        return acc;
-                      },
-                      { results: [], scholarCount: 0, patentCount: 0 }
-                    ).results;
+        const additionalResults = [...scholarResults, ...additionalPatents];
 
-                  // 4. Combine the lists (ensure no duplicates if an ID somehow appeared in both)
-                  const combinedMap = new Map();
-                  relevantResults.forEach((res) =>
-                    combinedMap.set(res.patent_id || res.scholar_id, res)
-                  );
-                  additionalResults.forEach((res) =>
-                    combinedMap.set(res.patent_id || res.scholar_id, res)
-                  );
-                  const displayedResults = Array.from(combinedMap.values());
+        // 4. Combine the lists
+        const combinedMap = new Map();
+        relevantResults.forEach((res) =>
+          combinedMap.set(res.patent_id || res.scholar_id, res)
+        );
+        additionalResults.forEach((res) =>
+          combinedMap.set(res.patent_id || res.scholar_id, res)
+        );
+        const displayedResults = Array.from(combinedMap.values());
 
-                  if (displayedResults.length === 0) {
-                    return <p>No patent results available to summarize.</p>;
-                  }
+        if (displayedResults.length === 0) {
+          return <p>No patent results available to summarize.</p>;
+        }
 
-// ... inside the InventionAnalyzer component, within the "Results Summary" section
+        // 5. Render the table dynamically
+        const itemsPerRow = 3;
+        const numRows = Math.ceil(
+          displayedResults.length / itemsPerRow
+        );
+        
+        let scholarResultCounter = 0;
 
-                  // 5. Render the table dynamically
-                  const itemsPerRow = 3;
-                  const numRows = Math.ceil(
-                    displayedResults.length / itemsPerRow
-                  );
-
-                  // FIX START: Pre-calculate scholar numbers to avoid side effects during render
-                  const scholarNumberMap = new Map();
-                  let currentScholarNumber = 1;
-                  displayedResults.forEach(result => {
-                    if (result.is_scholar) {
-                      // Use a unique ID for the scholar result as the key
-                      const scholarKey = result.scholar_id || JSON.stringify(result); // Fallback key
-                      if (!scholarNumberMap.has(scholarKey)) {
-                        scholarNumberMap.set(scholarKey, currentScholarNumber++);
+        return (
+          <table className="analyzer-table patent-summary-table">
+            <tbody>
+              {[...Array(numRows)].map((_, rowIndex) => (
+                <tr key={`summary-row-${rowIndex}`}>
+                  {[...Array(itemsPerRow)].map((_, colIndex) => {
+                    const resultIndex = rowIndex * itemsPerRow + colIndex;
+                    if (resultIndex < displayedResults.length) {
+                      const result = displayedResults[resultIndex];
+                      const isScholar = result.is_scholar;
+                      
+                      let displayText;
+                      if (isScholar) {
+                        scholarResultCounter++;
+                        displayText = `Scholar Res ${scholarResultCounter}`;
+                      } else {
+                        displayText = extractPatentNumber(result.patent_id || "");
                       }
+
+                      const link = isScholar
+                        ? result.scholar_link || "#"
+                        : result.patent_id
+                        ? `https://patents.google.com/${result.patent_id}`
+                        : "#";
+
+                      return (
+                        <td key={`summary-cell-${resultIndex}`}>
+                          {link !== "#" ? (
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="patent-number-link"
+                              title={`View ${isScholar ? "Scholar Result" : "Patent"}: ${displayText}`}
+                            >
+                              {displayText}
+                            </a>
+                          ) : (
+                            displayText
+                          )}
+                        </td>
+                      );
+                    } else {
+                      return (
+                        <td key={`summary-cell-empty-${resultIndex}`}></td>
+                      );
                     }
-                  });
-                  // FIX END
-
-                  // REMOVED: let scholarResultCounter = 0;
-
-                  return (
-                    <table className="analyzer-table patent-summary-table">
-                      <tbody>
-                        {[...Array(numRows)].map((_, rowIndex) => (
-                          <tr key={`summary-row-${rowIndex}`}>
-                            {[...Array(itemsPerRow)].map((_, colIndex) => {
-                              const resultIndex =
-                                rowIndex * itemsPerRow + colIndex;
-                              if (resultIndex < displayedResults.length) {
-                                const result = displayedResults[resultIndex];
-                                const isScholar = result.is_scholar;
-
-                                let displayText;
-                                if (isScholar) {
-                                  // FIX START: Use the pre-calculated map for a stable number
-                                  const scholarKey = result.scholar_id || JSON.stringify(result);
-                                  const scholarNum = scholarNumberMap.get(scholarKey);
-                                  displayText = `Scholar Res ${scholarNum}`;
-                                  // FIX END
-                                } else {
-                                  displayText = extractPatentNumber(
-                                    result.patent_id || ""
-                                  );
-                                }
-
-                                const link = isScholar
-                                  ? result.scholar_link || "#"
-                                  : result.patent_id
-                                  ? `https://patents.google.com/${result.patent_id}`
-                                  : "#";
-
-                                return (
-                                  <td key={`summary-cell-${resultIndex}`}>
-                                    {link !== "#" ? (
-                                      <a
-                                        href={link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="patent-number-link"
-                                        title={`View ${
-                                          isScholar
-                                            ? "Scholar Result"
-                                            : "Patent"
-                                        }: ${displayText}`}
-                                      >
-                                        {displayText}
-                                      </a>
-                                    ) : (
-                                      displayText
-                                    )}
-                                  </td>
-                                );
-                              } else {
-                                // Render empty cell if no more results for this row
-                                return (
-                                  <td
-                                    key={`summary-cell-empty-${resultIndex}`}
-                                  ></td>
-                                );
-                              }
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  );
-// ... rest of the component
-                })() // Immediately invoke the function
-              ) : (
-                <p>No patent results available to summarize.</p>
-              )}
-            </div>
-          </div>
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+      })()
+    ) : (
+      <p>No patent results available to summarize.</p>
+    )}
+  </div>
+</div>
         </div>
       )}
     </div>
