@@ -770,25 +770,34 @@ const PatentDraftingInno = () => {
 
   const analyzeHTML = generateAnalyzeInventionHTML(analyzeData);
   
-  let projectTitle = "Untitled Project";
-  try {
-    const projectId =
-      localStorage.getItem("project_id") ||
-      localStorage.getItem("selectedProject");
+// In handlePrintPdf function, replace the existing project title fetch code:
+let projectTitle = "Untitled Project";
+try {
+  const projectId =
+    localStorage.getItem("project_id") ||
+    localStorage.getItem("selectedProject");
+  
+  // Get user data from localStorage
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+  const u_id = user ? user.id : null;
 
-    if (projectId) {
-      const response = await axios.get("/getProjectData", {
-        params: { project_id: projectId },
-      });
-      
-      if (response.data && response.data.project_title) {
-        projectTitle = response.data.project_title;
-        console.log(`[handlePrintPdf] Successfully fetched project title: ${projectTitle}`);
-      }
+  if (projectId && u_id) {
+    const response = await axios.get("/getProjectData", {
+      params: { 
+        project_id: projectId,
+        u_id: u_id  // Add the missing u_id parameter
+      },
+    });
+    
+    if (response.data && response.data.project_title) {
+      projectTitle = response.data.project_title;
+      console.log(`[handlePrintPdf] Successfully fetched project title: ${projectTitle}`);
     }
-  } catch (error) {
-    console.error("[handlePrintPdf] Error fetching project title. Using default.", error);
   }
+} catch (error) {
+  console.error("[handlePrintPdf] Error fetching project title. Using default.", error);
+}
 
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
@@ -1376,28 +1385,33 @@ const createCompactPatentHeader = (patentId, assignee, year, rank) => {
       day: 'numeric'
     });
     
-    // Simplified and direct logic to fetch the project title, same as in handlePrintPdf
-    // Updated Project Title Fetching (use this exact code in both handlePrintPdf and handleDownloadDocx)
-let projectTitle = "Untitled Project"; // Default value
+// In handleDownloadDocx function, replace the existing project title fetch code:
+let projectTitle = "Untitled Project"; 
 try {
   const projectId =
     localStorage.getItem("project_id") ||
     localStorage.getItem("selectedProject");
+  
+  // Get user data from localStorage
+  const userData = localStorage.getItem("user");
+  const user = userData ? JSON.parse(userData) : null;
+  const u_id = user ? user.id : null;
 
-  if (projectId) {
-    // First try to get from the existing project data response
+  if (projectId && u_id) {
     const response = await axios.get("/getProjectData", {
-      params: { project_id: projectId },
+      params: { 
+        project_id: projectId,
+        u_id: u_id  // Add the missing u_id parameter
+      },
     });
     
-    // The project_title is stored in the Invention model
     if (response.data && response.data.project_title) {
       projectTitle = response.data.project_title;
-      console.log(`[handlePrintPdf/handleDownloadDocx] Successfully fetched project title: ${projectTitle}`);
+      console.log(`[handleDownloadDocx] Successfully fetched project title: ${projectTitle}`);
     }
   }
 } catch (error) {
-  console.error("[handlePrintPdf/handleDownloadDocx] Error fetching project title. Using default.", error);
+  console.error("[handleDownloadDocx] Error fetching project title. Using default.", error);
 }
     
     // Create an enhanced cover page with better design
