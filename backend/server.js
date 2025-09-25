@@ -2864,7 +2864,7 @@ async function processInventionAsync(
     // Modified prompt with variation to get different results
     const prompt1Variation = generatePrompt1(
       inventionText +
-        " Explore alternative embodiments and methods to achieve the same functional outcomes."
+        "Consider also prior-art references that tackle the same underlying technical problem or stated drawbacks, even if they employ different architectures, materials or control strategies, and broaden synonyms accordingly to surface functionally equivalent solutions across adjacent CPC classes and legacy terminology"
     );
 
     console.log(
