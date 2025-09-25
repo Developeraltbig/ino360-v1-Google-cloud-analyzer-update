@@ -320,15 +320,19 @@ const PatentDraftingInno = () => {
 
   let html = `
     <div style="border-top: 3px solid #36718b; border-bottom: 1px solid #ddd; margin: 30px 0 20px 0; padding: 10px 0;">
-      <h2 style="color: #36718b; margin: 5px 0; font-weight: 600; font-size: 18px;">Novelty Search Analysis</h2>
+      <h2 style="color: #36718b; margin: 5px 0; font-weight: 600; font-size: 20px; letter-spacing: 0.5px;">NOVELTY SEARCH ANALYSIS</h2>
     </div>
   `;
 
   // Relevant Search Results - Use comparisons directly (10 patents)
   if (analyzeData.comparisons && Array.isArray(analyzeData.comparisons)) {
     html += `
-      <div style="background-color: #f8f9fa; border-left: 5px solid #2196f3; padding: 10px 15px; margin: 20px 0;">
-        <h3 style="color: #2196f3; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Relevant Search Results (${analyzeData.comparisons.length})</h3>
+      <div style="background: linear-gradient(to right, #e3f2fd, #f5f5f5); border-left: 5px solid #2196f3; padding: 12px 18px; margin: 25px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);">
+        <h3 style="color: #1976d2; margin: 0; font-weight: 600; font-size: 18px; display: flex; align-items: center;">
+          <span style="margin-right: 10px;">📊</span>
+          Relevant Search Results 
+          <span style="background-color: #1976d2; color: white; padding: 3px 10px; margin-left: 15px; border-radius: 15px; font-size: 14px; font-weight: 500;">${analyzeData.comparisons.length}</span>
+        </h3>
       </div>
     `;
 
@@ -338,88 +342,73 @@ const PatentDraftingInno = () => {
       const details = comparison.details || {};
 
       html += `
-        <div style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 30px; overflow: hidden;">
-          <!-- Patent Header -->
-          <div style="background-color: #f5f7f9; padding: 15px; border-bottom: 1px solid #ddd;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <strong style="font-size: 14px;">Search Result ID: </strong>
-                <a href="https://patents.google.com/patent/${simplifiedId}" target="_blank" style="color: #2196f3; text-decoration: none; font-weight: 500;">${simplifiedId}</a>
+        <div style="border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 35px; overflow: hidden; transition: box-shadow 0.3s ease;">
+          <!-- Compact Patent Header -->
+          <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 12px 20px; border-bottom: 1px solid #dee2e6;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 20px;">📄</span>
+                <a href="https://patents.google.com/patent/${simplifiedId}" target="_blank" style="color: #1976d2; text-decoration: none; font-weight: 600; font-size: 15px; hover: text-decoration: underline;">${simplifiedId}</a>
+                ${details.assignee ? `<span style="color: #666; font-size: 13px; border-left: 1px solid #ccc; padding-left: 15px;">${details.assignee}</span>` : ""}
+                ${details.filing_date ? `<span style="color: #666; font-size: 13px;">${details.filing_date.split('-')[0]}</span>` : ""}
               </div>
               ${
                 comparison.rank
-                  ? `<div style="background-color: #36718b; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;">Rank #${comparison.rank}</div>`
+                  ? `<div style="background: linear-gradient(135deg, #36718b, #4a90a4); color: white; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 4px rgba(54, 113, 139, 0.3);">Rank #${comparison.rank}</div>`
                   : ""
               }
             </div>
           </div>
           
-          <!-- Patent Content -->
-          <div style="padding: 15px 20px;">
-            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">Title</h4>
-            <p style="margin: 0 0 15px; font-size: 13px; color: #444; font-weight: 500;">${
+          <!-- Patent Content with improved spacing -->
+          <div style="padding: 20px 25px;">
+            <h4 style="margin: 0 0 12px 0; color: #2c3e50; font-size: 16px; font-weight: 600; line-height: 1.4;">${
               details.title || "No title available"
-            }</p>
+            }</h4>
             
-            <!-- Found & Missing Sections -->
-            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-              ${
-                comparison.foundSummary
-                  ? `
-              <div style="flex: 1; background-color: #e9f7ef; padding: 12px; border-radius: 5px; border-left: 4px solid #2ecc71;">
-                <strong style="color: #2ecc71; display: block; margin-bottom: 5px; font-size: 12px;">COVERAGE IDENTIFIED</strong>
-                <p style="margin: 0; font-size: 12px; color: #333;">${comparison.foundSummary}</p>
+            <!-- Coverage Section with better visual -->
+            ${
+              comparison.foundSummary
+                ? `
+              <div style="background: linear-gradient(to right, #e8f5e9, #f1f8f2); padding: 14px 18px; border-radius: 8px; border-left: 4px solid #4caf50; margin-bottom: 18px;">
+                <div style="display: flex; align-items: start; gap: 10px;">
+                  <span style="color: #2e7d32; font-size: 18px; margin-top: 2px;">✓</span>
+                  <div>
+                    <strong style="color: #2e7d32; display: block; margin-bottom: 6px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Coverage Identified</strong>
+                    <p style="margin: 0; font-size: 13px; color: #1b5e20; line-height: 1.6;">${comparison.foundSummary}</p>
+                  </div>
+                </div>
               </div>`
-                  : ""
-              }
-            </div>
+                : ""
+            }
             
-            <!-- Abstract Section -->
+            <!-- Abstract Section with better typography -->
             ${
               details.abstract || details.snippet
                 ? `
-              <div style="background-color: #f9f9f9; padding: 12px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #eee;">
-                <strong style="color: #666; display: block; margin-bottom: 5px; font-size: 12px;">ABSTRACT</strong>
-                <p style="margin: 0; font-size: 12px; color: #555; line-height: 1.5;">${details.abstract || details.snippet}</p>
+              <div style="background-color: #fafafa; padding: 14px 18px; border-radius: 8px; margin-bottom: 18px; border: 1px solid #e8e8e8;">
+                <strong style="color: #616161; display: block; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Abstract</strong>
+                <p style="margin: 0; font-size: 13px; color: #424242; line-height: 1.7; text-align: justify;">${details.abstract || details.snippet}</p>
               </div>`
                 : ""
             }
             
-            <!-- Meta Information -->
-            <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;">
-              <div>
-                ${
-                  details.filing_date
-                    ? `<span style="color: #666;"><strong>Filing Date:</strong> ${details.filing_date}</span>`
-                    : ""
-                }
-              </div>
-              <div>
-                ${
-                  details.assignee
-                    ? `<span style="color: #666;"><strong>Assignee:</strong> ${details.assignee}</span>`
-                    : ""
-                }
-              </div>
+            <!-- Compact Meta Information -->
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 12px; color: #666; padding: 8px 0;">
+              ${details.filing_date ? `<span><strong>Filed:</strong> ${details.filing_date}</span>` : ""}
+              ${details.inventor ? `<span><strong>Inventor:</strong> ${details.inventor}</span>` : ""}
             </div>
-            ${
-              details.inventor
-                ? `
-              <div style="font-size: 12px; color: #666; margin-bottom: 15px;">
-                <strong>Inventor:</strong> ${details.inventor}
-              </div>`
-                : ""
-            }
           </div>
           
-          <!-- Feature Matrix Section -->
-          <div style="border-top: 1px solid #eee; padding: 15px 20px; background-color: #fafafa;">
-            <h4 style="margin: 0 0 15px 0; color: #36718b; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+          <!-- Feature Matrix Section with enhanced styling -->
+          <div style="background-color: #f8f9fa; border-top: 1px solid #e9ecef; padding: 20px 25px;">
+            <h4 style="margin: 0 0 18px 0; color: #36718b; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">🔍</span>
               Feature Comparison Matrix
             </h4>
             
-            <!-- Matrix Table -->
-            <div style="overflow-x: auto;">
+            <!-- Matrix Table with better styling -->
+            <div style="overflow-x: auto; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
       `;
 
       // Matrix data
@@ -429,13 +418,13 @@ const PatentDraftingInno = () => {
       
       if (matrixData.headers.length > 0) {
         html += `
-          <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 12px;">
+          <table style="border-collapse: collapse; width: 100%; font-size: 13px; background: white;">
             <thead>
               <tr>
                 ${matrixData.headers
                   .map(
                     (header) => `
-                  <th style="border: 1px solid #ddd; padding: 10px; background-color: #36718b; color: white; text-align: left; font-size: 12px; font-weight: 600;">${header}</th>
+                  <th style="border: 1px solid #dee2e6; padding: 12px; background: linear-gradient(to bottom, #36718b, #2d5a73); color: white; text-align: left; font-size: 13px; font-weight: 600; letter-spacing: 0.3px;">${header}</th>
                 `
                   )
                   .join("")}
@@ -445,11 +434,11 @@ const PatentDraftingInno = () => {
               ${matrixData.rows
                 .map(
                   (row, rowIndex) => `
-                <tr style="background-color: ${rowIndex % 2 === 0 ? '#fff' : '#f9f9f9'}">
+                <tr style="background-color: ${rowIndex % 2 === 0 ? '#ffffff' : '#f8f9fa'}; transition: background-color 0.2s;">
                   ${row
                     .map(
                       (cell, cellIndex) => `
-                    <td style="border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 12px; ${cellIndex === row.length - 1 && (cell.includes('Considerable') ? 'color: #2ecc71; font-weight: bold;' : (cell.includes('Partial') ? 'color: #f39c12; font-weight: bold;' : ''))}">${cell}</td>
+                    <td style="border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 12px; line-height: 1.5; ${cellIndex === row.length - 1 && (cell.includes('Considerable') ? 'color: #2e7d32; font-weight: 600; background-color: #e8f5e9;' : (cell.includes('Partial') ? 'color: #f57c00; font-weight: 600; background-color: #fff3e0;' : ''))}">${cell}</td>
                   `
                     )
                     .join("")}
@@ -467,11 +456,12 @@ const PatentDraftingInno = () => {
       html += `
             </div>
             
-            <!-- Excerpts Section -->
-            <h4 style="margin: 25px 0 15px 0; color: #36718b; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+            <!-- Excerpts Section with better design -->
+            <h4 style="margin: 28px 0 15px 0; color: #36718b; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 18px;">📝</span>
               Relevant Excerpts
             </h4>
-            <div style="background-color: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 5px; padding: 15px; font-size: 12px; line-height: 1.6; white-space: pre-wrap; color: #444; max-height: 200px; overflow-y: auto;">
+            <div style="background-color: #f5f7fa; border: 1px solid #d1d9e6; border-radius: 8px; padding: 16px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; color: #34495e; max-height: 250px; overflow-y: auto; font-family: 'Roboto', sans-serif;">
               ${comparison.excerpts || "No excerpts available"}
             </div>
           </div>
@@ -480,17 +470,14 @@ const PatentDraftingInno = () => {
     });
   }
 
-  // Additional Search Results Section (up to 20: 2 scholars + 18 patents)
+  // Additional Search Results Section with improved grid
   if (analyzeData.patentResults && Array.isArray(analyzeData.patentResults)) {
-    // Get the patent IDs that are already shown in relevant results
     const shownPatentIds = analyzeData.comparisons ? analyzeData.comparisons.map(c => extractPatentNumber(c.patentId)) : [];
     
-    // Filter scholar results (max 2)
     const scholarResults = analyzeData.patentResults
       .filter((result) => result.is_scholar)
       .slice(0, 2);
     
-    // Filter additional patents (not shown in relevant, max 18)
     const additionalPatents = analyzeData.patentResults
       .filter((result) => {
         if (result.is_scholar) return false;
@@ -503,10 +490,14 @@ const PatentDraftingInno = () => {
     
     if (combinedResults.length > 0) {
       html += `
-        <div style="background-color: #f8f9fa; border-left: 5px solid #2196f3; padding: 10px 15px; margin: 30px 0 20px 0;">
-          <h3 style="color: #2196f3; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Additional Search Results (${combinedResults.length})</h3>
+        <div style="background: linear-gradient(to right, #e3f2fd, #f5f5f5); border-left: 5px solid #2196f3; padding: 12px 18px; margin: 35px 0 25px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);">
+          <h3 style="color: #1976d2; margin: 0; font-weight: 600; font-size: 18px; display: flex; align-items: center;">
+            <span style="margin-right: 10px;">📚</span>
+            Additional Search Results
+            <span style="background-color: #1976d2; color: white; padding: 3px 10px; margin-left: 15px; border-radius: 15px; font-size: 14px; font-weight: 500;">${combinedResults.length}</span>
+          </h3>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-bottom: 35px;">
       `;
 
       let scholarCounter = 0;
@@ -515,65 +506,59 @@ const PatentDraftingInno = () => {
         if (isScholar) scholarCounter++;
         
         const simplifiedId = isScholar
-          ? `Scholar Res ${scholarCounter}`
+          ? `Scholar ${scholarCounter}`
           : extractPatentNumber(result.patent_id);
         const link = isScholar
           ? result.scholar_link || "#"
           : `https://patents.google.com/patent/${extractPatentNumber(result.patent_id)}`;
 
         html += `
-          <div style="border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <!-- Result Header -->
-            <div style="background-color: ${isScholar ? '#f0f4c3' : '#f5f7f9'}; padding: 12px; border-bottom: 1px solid #ddd;">
-              <strong style="font-size: 13px;">${
-                isScholar ? "Scholar Result: " : "Search Result ID: "
-              }</strong>
-              <a href="${link}" target="_blank" style="color: #2196f3; text-decoration: none; font-weight: 500;">
-                ${simplifiedId}
-              </a>
+          <div style="border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; hover: transform: translateY(-2px);">
+            <!-- Result Header with icon -->
+            <div style="background: ${isScholar ? 'linear-gradient(135deg, #fff8e1, #ffecb3)' : 'linear-gradient(135deg, #f5f7f9, #e9ecef)'}; padding: 12px 16px; border-bottom: 1px solid ${isScholar ? '#ffe082' : '#dee2e6'};">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">${isScholar ? '🔬' : '📄'}</span>
+                <a href="${link}" target="_blank" style="color: #1976d2; text-decoration: none; font-weight: 600; font-size: 14px; flex: 1;">
+                  ${simplifiedId}
+                </a>
+              </div>
             </div>
             
-            <!-- Result Content -->
-            <div style="padding: 12px;">
-              <h5 style="margin: 0 0 8px 0; color: #333; font-size: 13px;">Title</h5>
-              <p style="margin: 0 0 12px; font-size: 12px; color: #444; line-height: 1.4;">
+            <!-- Result Content with better spacing -->
+            <div style="padding: 16px;">
+              <h5 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 14px; font-weight: 600; line-height: 1.4;">
                 ${result.title || "No title available"}
-              </p>
+              </h5>
               
               ${
                 result.snippet
                   ? `
-                <div style="margin-bottom: 12px; font-size: 11px; color: #666; background-color: #f9f9f9; padding: 8px; border-radius: 4px; border-left: 2px solid #ddd;">
+                <div style="margin-bottom: 12px; font-size: 12px; color: #5a6c7d; background-color: #f8f9fa; padding: 10px; border-radius: 6px; line-height: 1.6;">
                   ${result.snippet}
                 </div>`
                   : ""
               }
               
-              <!-- Meta Information -->
-              <div style="font-size: 11px; color: #777;">
+              <!-- Compact Meta Information -->
+              <div style="font-size: 11px; color: #7a8b9a; line-height: 1.8;">
                 ${
                   isScholar && result.publication_date
-                    ? `<div><strong>Publication Date:</strong> ${result.publication_date}</div>`
+                    ? `<div><strong>Published:</strong> ${result.publication_date}</div>`
                     : ""
                 }
                 ${
                   !isScholar && result.filing_date
-                    ? `<div><strong>Filing Date:</strong> ${result.filing_date}</div>`
+                    ? `<div><strong>Filed:</strong> ${result.filing_date}</div>`
                     : ""
                 }
                 ${
                   isScholar && result.author
-                    ? `<div><strong>Author:</strong> ${result.author}</div>`
+                    ? `<div><strong>Authors:</strong> ${result.author}</div>`
                     : ""
                 }
                 ${
                   !isScholar && result.assignee
                     ? `<div><strong>Assignee:</strong> ${result.assignee}</div>`
-                    : ""
-                }
-                ${
-                  !isScholar && result.inventor
-                    ? `<div><strong>Inventor:</strong> ${result.inventor}</div>`
                     : ""
                 }
               </div>
@@ -586,16 +571,18 @@ const PatentDraftingInno = () => {
     }
   }
 
-  // Search Strategy Section
+  // Search Strategy Section with orange theme
   if (analyzeData.searchQueries && Array.isArray(analyzeData.searchQueries)) {
     html += `
-      <div style="background-color: #f8f9fa; border-left: 5px solid #ff9800; padding: 10px 15px; margin: 30px 0 20px 0;">
-        <h3 style="color: #ff9800; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Search Strategy & Queries Used</h3>
+      <div style="background: linear-gradient(to right, #fff3e0, #f5f5f5); border-left: 5px solid #ff9800; padding: 12px 18px; margin: 35px 0 25px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.1);">
+        <h3 style="color: #f57c00; margin: 0; font-weight: 600; font-size: 18px; display: flex; align-items: center;">
+          <span style="margin-right: 10px;">🔍</span>
+          Search Strategy & Queries Used
+        </h3>
       </div>
-      <div style="margin-bottom: 30px;">
+      <div style="margin-bottom: 35px;">
     `;
     
-    // Group queries by step
     const groupedQueries = analyzeData.searchQueries.reduce((acc, query) => {
       if (!acc[query.step]) {
         acc[query.step] = [];
@@ -606,11 +593,11 @@ const PatentDraftingInno = () => {
     
     Object.entries(groupedQueries).forEach(([step, queries]) => {
       html += `
-        <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-          <h4 style="color: #36718b; font-size: 14px; font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <div style="margin-bottom: 22px; padding: 18px; background-color: #fafafa; border-radius: 10px; border: 1px solid #e9ecef; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <h4 style="color: #2c5282; font-size: 15px; font-weight: 600; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0;">
             ${step}
           </h4>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; flex-direction: column; gap: 10px;">
       `;
       
       queries.forEach((queryItem, index) => {
@@ -619,11 +606,11 @@ const PatentDraftingInno = () => {
                           "#ff9800";
         
         html += `
-          <div style="display: flex; align-items: flex-start; gap: 10px; background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #dee2e6;">
-            <span style="background-color: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap; margin-top: 2px;">
+          <div style="display: flex; align-items: flex-start; gap: 12px; background-color: white; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+            <span style="background-color: ${badgeColor}; color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; white-space: nowrap; margin-top: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
               ${queryItem.type}
             </span>
-            <code style="flex: 1; font-family: Monaco, Consolas, 'Courier New', monospace; font-size: 11px; color: #333; background-color: #f5f5f5; padding: 6px; border-radius: 4px; word-break: break-word;">
+            <code style="flex: 1; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 12px; color: #2d3748; background-color: #f7fafc; padding: 8px 12px; border-radius: 6px; word-break: break-word; line-height: 1.5;">
               ${queryItem.query}
             </code>
           </div>
@@ -637,8 +624,8 @@ const PatentDraftingInno = () => {
     });
     
     html += `
-      <div style="margin-top: 15px; padding: 12px; background-color: #e8f4f8; border-radius: 6px; font-size: 12px; color: #555;">
-        <strong>Note:</strong> These queries were automatically generated and executed across multiple patent databases 
+      <div style="margin-top: 20px; padding: 14px 18px; background: linear-gradient(to right, #e8f4f8, #f0f9ff); border-radius: 8px; font-size: 13px; color: #2c5282; line-height: 1.7; border-left: 3px solid #3182ce;">
+        <strong style="font-weight: 600;">Note:</strong> These queries were automatically generated and executed across multiple patent databases 
         to ensure comprehensive prior art coverage. The system uses advanced query optimization techniques including 
         classification-based refinement and citation network analysis.
       </div>
@@ -646,18 +633,20 @@ const PatentDraftingInno = () => {
     `;
   }
 
-  // Results Summary Section - ADDED
+  // Results Summary Section with gray theme
   html += `
-    <div style="background-color: #f8f9fa; border-left: 5px solid #6c757d; padding: 10px 15px; margin: 30px 0 20px 0;">
-      <h3 style="color: #6c757d; margin: 0 0 10px 0; font-weight: 500; font-size: 16px;">Results Summary</h3>
+    <div style="background: linear-gradient(to right, #f5f5f5, #eeeeee); border-left: 5px solid #6c757d; padding: 12px 18px; margin: 35px 0 25px 0; border-radius: 0 8px 8px 0; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.1);">
+      <h3 style="color: #495057; margin: 0; font-weight: 600; font-size: 18px; display: flex; align-items: center;">
+        <span style="margin-right: 10px;">📋</span>
+        Results Summary
+      </h3>
     </div>
-    <h5 style="color: #666; margin: 0 0 15px 0; font-size: 14px;">
+    <p style="color: #6c757d; margin: 0 0 18px 0; font-size: 14px; font-style: italic;">
       Consolidated list of all the analyzed patents and NPLs
-    </h5>
+    </p>
   `;
 
   if (analyzeData.patentResults && analyzeData.comparisons) {
-    // Get all unique results
     const relevantPatentIds = analyzeData.comparisons.map(c => c.patentId);
     const relevantResults = relevantPatentIds
       .map((patentId) =>
@@ -696,7 +685,7 @@ const PatentDraftingInno = () => {
       let scholarResultCounter = 0;
 
       html += `
-        <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+        <table style="border-collapse: collapse; width: 100%; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <tbody>
       `;
 
@@ -709,11 +698,14 @@ const PatentDraftingInno = () => {
             const isScholar = result.is_scholar;
             
             let displayText;
+            let icon;
             if (isScholar) {
               scholarResultCounter++;
-              displayText = `Scholar Res ${scholarResultCounter}`;
+              displayText = `Scholar ${scholarResultCounter}`;
+              icon = "🔬";
             } else {
               displayText = extractPatentNumber(result.patent_id || "");
+              icon = "📄";
             }
 
             const link = isScholar
@@ -723,16 +715,19 @@ const PatentDraftingInno = () => {
               : "#";
 
             html += `
-              <td style="border: 1px solid #ddd; padding: 10px;">
-                ${link !== "#" ? `
-                  <a href="${link}" target="_blank" style="color: #2196f3; text-decoration: none;">
-                    ${displayText}
-                  </a>
-                ` : displayText}
+              <td style="border: 1px solid #dee2e6; padding: 12px; background-color: #fafafa; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 16px;">${icon}</span>
+                  ${link !== "#" ? `
+                    <a href="${link}" target="_blank" style="color: #1976d2; text-decoration: none; font-weight: 500;">
+                      ${displayText}
+                    </a>
+                  ` : `<span style="color: #495057; font-weight: 500;">${displayText}</span>`}
+                </div>
               </td>
             `;
           } else {
-            html += `<td style="border: 1px solid #ddd; padding: 10px;"></td>`;
+            html += `<td style="border: 1px solid #dee2e6; padding: 12px; background-color: #fafafa;"></td>`;
           }
         }
         html += `</tr>`;
@@ -743,10 +738,10 @@ const PatentDraftingInno = () => {
         </table>
       `;
     } else {
-      html += `<p>No patent results available to summarize.</p>`;
+      html += `<p style="color: #6c757d; font-style: italic;">No patent results available to summarize.</p>`;
     }
   } else {
-    html += `<p>No patent results available to summarize.</p>`;
+    html += `<p style="color: #6c757d; font-style: italic;">No patent results available to summarize.</p>`;
   }
 
   return html;
@@ -775,27 +770,25 @@ const PatentDraftingInno = () => {
 
   const analyzeHTML = generateAnalyzeInventionHTML(analyzeData);
   
-let projectTitle = "Untitled Project"; // Default value
-try {
-  const projectId =
-    localStorage.getItem("project_id") ||
-    localStorage.getItem("selectedProject");
+  let projectTitle = "Untitled Project";
+  try {
+    const projectId =
+      localStorage.getItem("project_id") ||
+      localStorage.getItem("selectedProject");
 
-  if (projectId) {
-    // First try to get from the existing project data response
-    const response = await axios.get("/getProjectData", {
-      params: { project_id: projectId },
-    });
-    
-    // The project_title is stored in the Invention model
-    if (response.data && response.data.project_title) {
-      projectTitle = response.data.project_title;
-      console.log(`[handlePrintPdf/handleDownloadDocx] Successfully fetched project title: ${projectTitle}`);
+    if (projectId) {
+      const response = await axios.get("/getProjectData", {
+        params: { project_id: projectId },
+      });
+      
+      if (response.data && response.data.project_title) {
+        projectTitle = response.data.project_title;
+        console.log(`[handlePrintPdf] Successfully fetched project title: ${projectTitle}`);
+      }
     }
+  } catch (error) {
+    console.error("[handlePrintPdf] Error fetching project title. Using default.", error);
   }
-} catch (error) {
-  console.error("[handlePrintPdf/handleDownloadDocx] Error fetching project title. Using default.", error);
-}
 
   const printWindow = window.open("", "_blank");
   if (!printWindow) {
@@ -803,7 +796,6 @@ try {
     return;
   }
 
-  // Current date for report
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric', 
     month: 'long', 
@@ -815,18 +807,45 @@ try {
       <head>
         <title>Ino360 Novelty Search Report</title>
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
+          
+          * {
+            box-sizing: border-box;
+          }
           
           body { 
             font-family: 'Roboto', Arial, sans-serif; 
             padding: 30px; 
-            line-height: 1.5; 
-            color: #333; 
+            line-height: 1.6; 
+            color: #2c3e50; 
             font-size: 12px;
             max-width: 1200px;
             margin: 0 auto;
+            background: white;
+            position: relative;
           }
           
+          /* Watermark */
+          body::before {
+            content: "CONFIDENTIAL";
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(0, 0, 0, 0.05);
+            font-weight: bold;
+            z-index: -1;
+            letter-spacing: 20px;
+          }
+          
+          /* Enhanced typography */
+          p {
+            line-height: 1.7;
+            margin-bottom: 12px;
+          }
+          
+          /* Cover page styling */
           .cover-page {
             height: 100vh;
             display: flex;
@@ -834,200 +853,239 @@ try {
             justify-content: center;
             align-items: center;
             text-align: center;
-            border: 1px solid #eee;
             margin-bottom: 40px;
             page-break-after: always;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            position: relative;
           }
           
           .logo {
-            font-size: 52px;
+            font-size: 64px;
             font-weight: 700;
             color: #36718b;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #36718b;
-            padding-bottom: 5px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
           }
           
           .report-title {
-            font-size: 28px;
-            font-weight: 500;
-            color: #36718b;
-            margin-bottom: 50px;
+            font-size: 32px;
+            font-weight: 300;
+            color: #2c5282;
+            margin-bottom: 60px;
+            letter-spacing: 1px;
           }
           
           .project-info {
             margin: 40px 0;
-            border: 1px solid #ddd;
-            padding: 30px;
-            border-radius: 10px;
-            background-color: #f9f9f9;
-            width: 60%;
+            padding: 40px;
+            border-radius: 15px;
+            background: white;
+            width: 70%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
           }
           
           .info-row {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            align-items: center;
           }
           
           .info-label {
-            font-weight: 500;
-            width: 100px;
+            font-weight: 600;
+            width: 120px;
             color: #555;
             text-align: right;
-            padding-right: 20px;
+            padding-right: 25px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
           }
           
           .info-value {
             flex: 1;
             font-weight: 400;
-            color: #333;
+            color: #2c3e50;
             text-align: left;
+            font-size: 16px;
           }
           
           .confidential {
             margin-top: 80px;
-            color: #888;
-            font-size: 11px;
+            color: #666;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-weight: 600;
           }
           
           .copyright {
             color: #888;
             font-size: 11px;
-            margin-top: 10px;
+            margin-top: 15px;
           }
           
+          /* Section styling */
           .section-divider {
-            border-top: 2px solid #36718b;
-            margin: 30px 0;
+            border-top: 3px solid #36718b;
+            margin: 40px 0;
           }
           
           h2 { 
             color: #36718b; 
-            margin-top: 30px; 
-            margin-bottom: 15px; 
-            font-size: 20px; 
-            font-weight: 500;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 8px;
+            margin-top: 35px; 
+            margin-bottom: 20px; 
+            font-size: 22px; 
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            letter-spacing: 0.5px;
           }
           
           h3 { 
-            color: #2196f3; 
-            margin-top: 25px; 
-            margin-bottom: 15px; 
-            font-size: 16px; 
-            font-weight: 500;
-            background-color: #f5f7fa;
-            padding: 8px 15px;
-            border-left: 4px solid #2196f3;
+            color: #1976d2; 
+            margin-top: 30px; 
+            margin-bottom: 18px; 
+            font-size: 18px; 
+            font-weight: 600;
+            background: linear-gradient(to right, #e3f2fd, #f5f5f5);
+            padding: 12px 20px;
+            border-left: 5px solid #2196f3;
+            border-radius: 0 8px 8px 0;
+          }
+          
+          h4 {
+            color: #2c5282;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
           }
           
           h5 { 
-            color: #333; 
+            color: #34495e; 
             margin-top: 15px; 
             font-size: 14px; 
-            font-weight: 500;
+            font-weight: 600;
           }
           
+          /* Table styling */
           table { 
             border-collapse: collapse; 
             width: 100%; 
-            margin-bottom: 20px; 
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            overflow: hidden;
           }
           
           th, td { 
-            border: 1px solid #ddd; 
-            padding: 10px; 
+            border: 1px solid #dee2e6; 
+            padding: 12px; 
             text-align: left; 
             font-size: 12px; 
           }
           
           th {
-            background-color: #36718b;
+            background: linear-gradient(to bottom, #36718b, #2d5a73);
             color: white;
-            font-weight: 500;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            position: sticky;
+            top: 0;
           }
           
           tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f8f9fa;
           }
           
-          pre { 
-            white-space: pre-wrap; 
-            background-color: #f5f5f5; 
-            padding: 15px; 
-            border-radius: 5px; 
-            font-size: 12px;
-            border: 1px solid #e0e0e0;
-            line-height: 1.6;
+          tr:hover {
+            background-color: #e9ecef;
           }
           
+          /* Code and pre styling */
+          pre, code { 
+            background-color: #f7fafc; 
+            padding: 16px; 
+            border-radius: 8px; 
+            font-size: 11px;
+            border: 1px solid #e2e8f0;
+            line-height: 1.7;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+          }
+          
+          code {
+            padding: 2px 6px;
+            font-size: 11px;
+          }
+          
+          /* Link styling */
           a { 
-            color: #2196f3; 
-            text-decoration: none; 
+            color: #1976d2; 
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
           }
           
+          a:hover {
+            color: #1565c0;
+            text-decoration: underline;
+          }
+          
+          /* Report sections */
           .report-section { 
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             page-break-inside: avoid;
           }
           
-          .section-heading { 
-            border-bottom: 1px solid #eee; 
-            padding-bottom: 8px; 
-          }
-          
+          /* Patent cards */
           .patent-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 35px;
             overflow: hidden;
             page-break-inside: avoid;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: box-shadow 0.3s;
           }
           
           .patent-header {
-            background-color: #f5f7f9;
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
           }
           
           .patent-body {
-            padding: 15px;
+            padding: 20px 25px;
           }
           
-          .found-missing-container {
-            display: flex;
-            gap: 15px;
-            margin: 15px 0;
+          /* Coverage boxes */
+          .coverage-box {
+            background: linear-gradient(to right, #e8f5e9, #f1f8f2);
+            padding: 14px 18px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            margin-bottom: 18px;
           }
           
-          .found-box {
-            flex: 1;
-            background-color: #e9f7ef;
-            padding: 12px;
-            border-radius: 5px;
-            border-left: 4px solid #2ecc71;
-          }
-          
-          .missing-box {
-            flex: 1;
-            background-color: #fef9e7;
-            padding: 12px;
-            border-radius: 5px;
-            border-left: 4px solid #f39c12;
-          }
-          
+          /* Meta information */
           .meta-info {
             display: flex;
-            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
             font-size: 12px;
             color: #666;
-            margin: 10px 0;
+            padding: 8px 0;
           }
           
+          /* Icons */
+          .icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 18px;
+          }
+          
+          /* Page header/footer */
           @media print {
             body {
               padding: 0;
@@ -1036,6 +1094,67 @@ try {
             .page-break {
               page-break-after: always;
             }
+            
+            @page {
+              margin: 2cm;
+              @top-right {
+                content: "Ino360 Novelty Search Report | Page " counter(page);
+                font-size: 10px;
+                color: #666;
+              }
+            }
+            
+            /* Ensure watermark prints */
+            body::before {
+              position: fixed !important;
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+          }
+          
+          /* Badge styling */
+          .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #36718b, #4a90a4);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          }
+          
+          /* Grid layout for additional results */
+          .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+            margin-bottom: 35px;
+          }
+          
+          .result-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+          }
+          
+          .result-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          
+          .scholar-header {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            border-color: #ffe082;
+          }
+          
+          .patent-header-simple {
+            background: linear-gradient(135deg, #f5f7f9, #e9ecef);
           }
         </style>
       </head>
@@ -1047,15 +1166,15 @@ try {
           
           <div class="project-info">
             <div class="info-row">
-              <div class="info-label">Title:</div>
+              <div class="info-label">Title</div>
               <div class="info-value">${projectTitle}</div>
             </div>
             <div class="info-row">
-              <div class="info-label">Project ID:</div>
+              <div class="info-label">Project ID</div>
               <div class="info-value">${projID}</div>
             </div>
             <div class="info-row">
-              <div class="info-label">Date:</div>
+              <div class="info-label">Date</div>
               <div class="info-value">${currentDate}</div>
             </div>
           </div>
@@ -1124,48 +1243,102 @@ try {
 
   // Helper function to create a section header for DOCX
   const createSectionHeader = (text) => {
-    return new Paragraph({
-      children: [
-        new TextRun({
-          text: text,
-          bold: true,
-          size: 28, // 14pt
-          color: "36718b",
-        }),
-      ],
-      spacing: { before: 400, after: 100 },
-      borders: {
-        bottom: { color: "CCCCCC", style: BorderStyle.SINGLE, size: 10 },
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: text.toUpperCase(),
+        bold: true,
+        size: 32, // 16pt
+        color: "36718b",
+      }),
+    ],
+    spacing: { before: 600, after: 200 },
+    borders: {
+      bottom: { color: "e2e8f0", style: BorderStyle.SINGLE, size: 15 },
+    },
+  });
+};
+
+// Create compact patent header for DOCX
+const createCompactPatentHeader = (patentId, assignee, year, rank) => {
+  const children = [
+    new TextRun({
+      text: "📄 ",
+      size: 28,
+    }),
+    new TextRun({
+      text: patentId,
+      bold: true,
+      size: 26,
+      color: "1976d2",
+    }),
+  ];
+
+  if (assignee) {
+    children.push(
+      new TextRun({
+        text: ` | ${assignee}`,
+        size: 24,
+        color: "666666",
+      })
+    );
+  }
+
+  if (year) {
+    children.push(
+      new TextRun({
+        text: ` | ${year}`,
+        size: 24,
+        color: "666666",
+      })
+    );
+  }
+
+  return new Paragraph({
+    children,
+    spacing: { before: 400, after: 150 },
+    shading: {
+      type: "solid",
+      color: "f8f9fa",
+    },
+    borders: {
+      all: {
+        color: "e0e0e0",
+        style: BorderStyle.SINGLE,
+        size: 3,
       },
-    });
-  };
+    },
+    indent: { left: 200, right: 200 },
+    alignment: AlignmentType.LEFT,
+  });
+};
 
   // Helper function to create a styled subheader for DOCX
   const createSubHeader = (text) => {
-    return new Paragraph({
-      children: [
-        new TextRun({
-          text: text,
-          bold: true,
-          size: 24, // 12pt
-          color: "2196f3",
-        }),
-      ],
-      spacing: { before: 300, after: 100 },
-      shading: {
-        type: "solid",
-        color: "f5f7fa",
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: text,
+        bold: true,
+        size: 26, // 13pt
+        color: "1976d2",
+      }),
+    ],
+    spacing: { before: 400, after: 200 },
+    shading: {
+      type: "solid",
+      color: "e3f2fd",
+    },
+    border: {
+      left: {
+        color: "2196f3",
+        style: BorderStyle.SINGLE,
+        size: 20,
       },
-      border: {
-        left: {
-          color: "2196f3",
-          style: BorderStyle.SINGLE,
-          size: 16,
-        },
-      },
-      indent: { left: 120 },
-    });
-  };
+    },
+    indent: { left: 200 },
+  });
+};
 
   // Helper function for patent card section
   const createPatentCard = (patentId, title, isStart = false) => {
@@ -2183,32 +2356,35 @@ if (analyzeData.patentResults && analyzeData.comparisons) {
   }
 };
 
-  // Helper function to create a result cell for the additional results table
+  // Updated result table cell with icons
 function createResultTableCell(result, scholarResults) {
   if (!result) return new TableCell({ children: [new Paragraph({ text: "" })] });
   
   const isScholar = result.is_scholar;
   let simplifiedId;
+  let icon;
   
   if (isScholar) {
     const scholarIndex = scholarResults.indexOf(result) + 1;
-    simplifiedId = `Scholar Res ${scholarIndex}`;
+    simplifiedId = `Scholar ${scholarIndex}`;
+    icon = "🔬 ";
   } else {
     simplifiedId = extractPatentNumber(result.patent_id);
+    icon = "📄 ";
   }
   
   const cellChildren = [
     new Paragraph({
       children: [
         new TextRun({
-          text: `${isScholar ? "Scholar Result" : "Search Result ID"}: `,
-          bold: true,
-          size: 24,
+          text: icon,
+          size: 26,
         }),
         new TextRun({
           text: simplifiedId,
           size: 24,
-          color: "2196f3",
+          color: "1976d2",
+          bold: true,
         }),
       ],
       spacing: { before: 120, after: 80 },
@@ -2217,55 +2393,29 @@ function createResultTableCell(result, scholarResults) {
     new Paragraph({
       children: [
         new TextRun({ 
-          text: "Title: ", 
-          bold: true, 
-          size: 24 
-        }),
-        new TextRun({ 
           text: result.title || "No title available", 
-          size: 24 
+          size: 24,
+          color: "2c3e50",
         }),
       ],
       spacing: { after: 80 },
+      indent: { left: 120 },
     }),
   ];
   
-  if (result.snippet) {
-    cellChildren.push(
-      new Paragraph({
-        children: [
-          new TextRun({ 
-            text: result.snippet, 
-            size: 24,
-            color: "666666" 
-          }),
-        ],
-        spacing: { after: 80 },
-        shading: {
-          type: "solid",
-          color: "f9f9f9",
-        },
-      })
-    );
-  }
-  
-  // Add metadata
+  // Add metadata with better formatting
   const metaInfo = [];
   
-  if (isScholar && result.publication_date) {
-    metaInfo.push(`Publication Date: ${result.publication_date}`);
-  } else if (!isScholar && result.filing_date) {
-    metaInfo.push(`Filing Date: ${result.filing_date}`);
-  }
-  
   if (isScholar && result.author) {
-    metaInfo.push(`Author: ${result.author}`);
-  } else if (!isScholar && result.assignee) {
-    metaInfo.push(`Assignee: ${result.assignee}`);
+    metaInfo.push(`Authors: ${result.author}`);
   }
   
-  if (!isScholar && result.inventor) {
-    metaInfo.push(`Inventor: ${result.inventor}`);
+  if (result.publication_date || result.filing_date) {
+    metaInfo.push(`${isScholar ? 'Published' : 'Filed'}: ${result.publication_date || result.filing_date}`);
+  }
+  
+  if (!isScholar && result.assignee) {
+    metaInfo.push(`Assignee: ${result.assignee}`);
   }
   
   if (metaInfo.length > 0) {
@@ -2274,11 +2424,13 @@ function createResultTableCell(result, scholarResults) {
         children: [
           new TextRun({
             text: metaInfo.join(" | "),
-            size: 24,
-            color: "777777",
+            size: 22,
+            color: "7a8b9a",
+            italic: true,
           }),
         ],
         spacing: { after: 80 },
+        indent: { left: 120 },
       })
     );
   }
@@ -2286,17 +2438,22 @@ function createResultTableCell(result, scholarResults) {
   return new TableCell({
     children: cellChildren,
     borders: {
-      top: { style: BorderStyle.SINGLE, size: 1, color: "EEEEEE" },
-      bottom: { style: BorderStyle.SINGLE, size: 1, color: "EEEEEE" },
-      left: { style: BorderStyle.NONE },
-      right: { style: BorderStyle.NONE },
+      all: {
+        style: BorderStyle.SINGLE,
+        size: 2,
+        color: "e0e0e0",
+      },
     },
     width: { size: 50, type: WidthType.PERCENTAGE },
     margins: {
-      top: 100,
-      bottom: 100,
-      left: 300,
-      right: 300,
+      top: 150,
+      bottom: 150,
+      left: 200,
+      right: 200,
+    },
+    shading: {
+      type: "solid",
+      color: isScholar ? "fffaf0" : "fafafa",
     },
   });
 }
